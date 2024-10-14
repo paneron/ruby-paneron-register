@@ -1,0 +1,12 @@
+id: 00000000-0000-0000-0000-000000000006
+data:
+  identifier: 6
+  name: Sample Item
+  blob1: data:text/plain;base64,SGVsbG8sIFdvcmxkIQ==
+  remarks: >-
+    Lorem ipsum
+  dimensions:
+    - 1024
+    - 1024
+status: valid
+dateAccepted: 2024-01-01T00:00:00.000Z

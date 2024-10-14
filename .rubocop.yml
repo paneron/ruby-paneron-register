@@ -1,0 +1,40 @@
+inherit_from:
+  - https://raw.githubusercontent.com/riboseinc/oss-guides/master/ci/rubocop.yml
+
+# local repo-specific modifications
+# ...
+
+Layout/LineLength:
+  Enabled: true
+  AllowedPatterns: ["^\\s*#"]
+
+Metrics/MethodLength:
+  Enabled: true
+  CountAsOne: ["array", "hash", "heredoc", "method_call"]
+
+Metrics/BlockLength:
+  Enabled: true
+  Exclude: [ "**/*.gemspec", "spec/**" ]
+
+Layout/MultilineHashKeyLineBreaks:
+  Enabled: true
+  AllowMultilineFinalElement: false
+
+Layout/FirstHashElementLineBreak:
+  Enabled: true
+  AllowMultilineFinalElement: false
+
+Layout/MultilineArrayLineBreaks:
+  Enabled: true
+  AllowMultilineFinalElement: false
+
+Layout/FirstHashElementIndentation:
+  Enabled: true
+  EnforcedStyle: consistent
+
+Layout/FirstArrayElementIndentation:
+  Enabled: true
+  EnforcedStyle: consistent
+
+AllCops:
+  TargetRubyVersion: 3.1

@@ -1,0 +1,40 @@
+name: Test Registry 1
+stakeholders:
+  - roles:
+      - submitter
+      - manager
+      - control-body-reviewer
+      - control-body
+      - owner
+    name: Stake Holder 1
+    gitServerUsername: stakeholder1
+    contacts:
+      - label: email
+        value: stakeholder1@example.com
+  - roles:
+      - owner
+      - manager
+    name: Stake Holder 2
+    gitServerUsername: stakeholder2
+    affiliations:
+      00000000-000a-000b-000c-000000000000:
+        role: member
+    contacts:
+      - label: email
+        value: stakeholder2@example.com
+version:
+  id: '1.1'
+  timestamp: 2024-01-01T07:00:00.000Z
+contentSummary: >-
+  <p>
+  This is a test registry.
+  </p>
+
+operatingLanguage:
+  name: English
+  country: N/A
+  languageCode: eng
+organizations:
+  00000000-000a-000b-000c-000000000000:
+    name: Stake Holdings, Inc.
+    logoURL: ''
