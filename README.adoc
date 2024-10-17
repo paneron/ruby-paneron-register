@@ -16,7 +16,7 @@ gem install paneron_registry
 == Usage
 
 ```ruby
-require 'paneron_registry'
+require "paneron_registry"
 
 # Initialize a new registry
 # This example uses a working copy of Paneron's registry.
