@@ -33,6 +33,12 @@
         ];
         commands = [
           {
+            name = "release";
+            command = "bundle exec rake release \"$@\"";
+            help = "Run rake release, which adds a tag and pushes to RubyGems";
+            category = "Ruby";
+          }
+          {
             name = "rubocop";
             command = "bundle exec rubocop \"$@\"";
             help = "Run rubocop";
