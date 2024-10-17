@@ -10,13 +10,13 @@ image:https://img.shields.io/github/commits-since/paneron/ruby-paneron_registry/
 == Installation
 
 ```sh
-gem install paneron-registry
+gem install paneron_registry
 ```
 
 == Usage
 
 ```ruby
-require 'paneron-registry'
+require 'paneron_registry'
 
 # Initialize a new registry
 # This example uses a working copy of Paneron's registry.
