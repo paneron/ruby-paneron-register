@@ -54,8 +54,9 @@ module PaneronRegistry
 
     def registries(registry_name = nil)
       if registry_name.nil?
-        registry_names.map do |registry_name|
-          registries(registry_name)
+        registry_names.reduce({}) do |acc, registry_name|
+          acc[registry_name] = registries(registry_name)
+          acc
         end
       else
         @registries[registry_name] ||=

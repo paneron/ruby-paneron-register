@@ -33,8 +33,9 @@ module PaneronRegistry
 
     def item_yamls(uuid = nil)
       if uuid.nil?
-        item_uuids.map do |uuid|
-          item_yamls(uuid)
+        item_uuids.reduce({}) do |acc, uuid|
+          acc[uuid] = item_yamls(uuid)
+          acc
         end
       else
         @items[uuid] ||=

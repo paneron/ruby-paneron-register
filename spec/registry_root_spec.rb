@@ -24,8 +24,16 @@ RSpec.describe PaneronRegistry::RegistryRoot do
       )
     end
 
+    it "retrieves registries as a Hash" do
+      expect(root.registries).to be_instance_of(Hash)
+    end
+
+    it "retrieves all registries" do
+      expect(root.registries.length).to be 3
+    end
+
     it "retrieves registry objects" do
-      root.registries.each do |registry|
+      root.registries.each_pair do |_registry_name, registry|
         expect(registry).to be_instance_of(PaneronRegistry::Registry)
       end
     end

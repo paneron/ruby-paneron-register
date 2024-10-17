@@ -12,8 +12,12 @@ RSpec.describe PaneronRegistry::Registry do
       )
     end
 
+    it "retrieves item classes as a Hash" do
+      expect(registry.item_classes).to be_instance_of(Hash)
+    end
+
     it "retrieves item classes" do
-      registry.item_classes.each do |item_class|
+      registry.item_classes.each_pair do |_item_class_name, item_class|
         expect(item_class).to be_instance_of(PaneronRegistry::ItemClass)
       end
     end
