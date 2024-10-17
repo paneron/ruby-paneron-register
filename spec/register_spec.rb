@@ -1,11 +1,11 @@
-RSpec.describe PaneronRegistry::Registry do
-  let(:registry) do
-    PaneronRegistry::Registry.new("spec/fixtures/test-registry", "reg-1")
+RSpec.describe Paneron::Register::Register do
+  let(:register) do
+    Paneron::Register::Register.new("spec/fixtures/test-register", "reg-1")
   end
 
   describe "item classes" do
     it "lists out item classes" do
-      expect(registry.item_class_names).to contain_exactly(
+      expect(register.item_class_names).to contain_exactly(
         "item-class-1",
         "item-class-2",
         "item-class-3",
@@ -13,31 +13,31 @@ RSpec.describe PaneronRegistry::Registry do
     end
 
     it "retrieves item classes as a Hash" do
-      expect(registry.item_classes).to be_instance_of(Hash)
+      expect(register.item_classes).to be_instance_of(Hash)
     end
 
     it "retrieves item classes" do
-      registry.item_classes.each_pair do |_item_class_name, item_class|
-        expect(item_class).to be_instance_of(PaneronRegistry::ItemClass)
+      register.item_classes.each_pair do |_item_class_name, item_class|
+        expect(item_class).to be_instance_of(Paneron::Register::ItemClass)
       end
     end
 
     it "lists out item UUIDs" do
-      expect(registry.item_uuids.length).to be(9)
+      expect(register.item_uuids.length).to be(9)
     end
 
     it "retrieves a specific item class" do
-      expect(registry.item_classes("item-class-1")).to be_instance_of(
-        PaneronRegistry::ItemClass,
+      expect(register.item_classes("item-class-1")).to be_instance_of(
+        Paneron::Register::ItemClass,
       )
     end
   end
 
-  it "gets registry metadata" do
-    expect(registry.get_metadata_yaml).to eql(
+  it "gets register metadata" do
+    expect(register.get_metadata_yaml).to eql(
       {
-        "contentSummary" => "<p> This is a test registry. </p>",
-        "name" => "Test Registry 1",
+        "contentSummary" => "<p> This is a test register. </p>",
+        "name" => "Test Register 1",
         "operatingLanguage" => {
           "country" => "N/A",
           "languageCode" => "eng",

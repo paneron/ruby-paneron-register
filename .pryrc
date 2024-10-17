@@ -1,1 +1,1 @@
-require "paneron_registry"
+require "paneron/register"

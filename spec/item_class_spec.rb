@@ -1,6 +1,6 @@
-RSpec.describe PaneronRegistry::ItemClass do
+RSpec.describe Paneron::Register::ItemClass do
   let(:item_class) do
-    PaneronRegistry::ItemClass.new("spec/fixtures/test-registry", "reg-1",
+    Paneron::Register::ItemClass.new("spec/fixtures/test-register", "reg-1",
                                    "item-class-1")
   end
 

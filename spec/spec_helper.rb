@@ -21,7 +21,7 @@ SimpleCov.start do
 end
 
 require "bundler/setup"
-require "paneron_registry"
+require "paneron/register"
 require "rspec/matchers"
 require "rspec-command"
 

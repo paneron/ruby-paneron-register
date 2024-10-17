@@ -1,35 +1,35 @@
-= Paneron Registry Ruby Gem
+= Paneron Register Ruby Gem
 
-image:https://img.shields.io/gem/v/paneron_registry.svg["Gem Version", link="https://rubygems.org/gems/paneron_registry"]
-image:https://github.com/paneron/ruby-paneron_registry/actions/workflows/test.yaml/badge.svg["Build Status",Link="https://github.com/paneron/ruby-paneron_registry/actions/workflows/test.yaml"]
-image:https://codeclimate.com/github/paneron/ruby-paneron_registry/badges/gpa.svg["Code Climate", link="https://codeclimate.com/github/paneron/ruby-paneron_registry"]
-image:https://img.shields.io/github/issues-pr-raw/paneron/ruby-paneron_registry.svg["Pull Requests", link="https://github.com/paneron/ruby-paneron_registry/pulls"]
-image:https://img.shields.io/github/commits-since/paneron/ruby-paneron_registry/latest.svg["Commits since latest",link="https://github.com/paneron/ruby-paneron_registry/releases"]
+image:https://img.shields.io/gem/v/paneron-register.svg["Gem Version", link="https://rubygems.org/gems/paneron-register"]
+image:https://github.com/paneron/ruby-paneron-register/actions/workflows/test.yaml/badge.svg["Build Status",Link="https://github.com/paneron/ruby-paneron-register/actions/workflows/test.yaml"]
+image:https://codeclimate.com/github/paneron/ruby-paneron-register/badges/gpa.svg["Code Climate", link="https://codeclimate.com/github/paneron/ruby-paneron-register"]
+image:https://img.shields.io/github/issues-pr-raw/paneron/ruby-paneron-register.svg["Pull Requests", link="https://github.com/paneron/ruby-paneron-register/pulls"]
+image:https://img.shields.io/github/commits-since/paneron/ruby-paneron-register/latest.svg["Commits since latest",link="https://github.com/paneron/ruby-paneron-register/releases"]
 
 
 == Installation
 
 ```sh
-gem install paneron_registry
+gem install paneron-register
 ```
 
 == Usage
 
 ```ruby
-require "paneron_registry"
+require "paneron/register"
 
-# Initialize a new registry
-# This example uses a working copy of Paneron's registry.
-registry = PaneronRegistry::Registry.new(
+# Initialize a new register
+# This example uses a working copy of Paneron's register.
+register = Paneron::Register::Register.new(
   "/Users/username/Library/Application Support/Electron/working_copies/00000000-0001-0000-0000-000000000001",
   "register_name-1"
 )
 
-# Alternatively, initialize a new registry root:
-root = PaneronRegistry::RegistryRoot.new(
+# Alternatively, initialize a new register root:
+root = Paneron::Register::RegisterRoot.new(
   "/Users/username/Library/Application Support/Electron/working_copies/00000000-0001-0000-0000-000000000001",
 )
-registry = root.registries("register_name-1")
+register = root.registries("register_name-1")
 
 # Get all item class objects
 register.item_classes

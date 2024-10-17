@@ -1,4 +1,4 @@
-name: Test Registry 1
+name: Test Register 1
 stakeholders:
   - roles:
       - submitter
@@ -27,7 +27,7 @@ version:
   timestamp: 2024-01-01T07:00:00.000Z
 contentSummary: >-
   <p>
-  This is a test registry.
+  This is a test register.
   </p>
 
 operatingLanguage:

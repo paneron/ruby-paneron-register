@@ -1,16 +1,16 @@
 lib = File.expand_path("lib", __dir__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require "paneron_registry/version"
+require "paneron/register/version"
 
 Gem::Specification.new do |spec|
-  spec.name          = "paneron_registry"
-  spec.version       = PaneronRegistry::VERSION
+  spec.name          = "paneron-register"
+  spec.version       = Paneron::Register::VERSION
   spec.authors       = ["Ribose Inc."]
   spec.email         = ["open.source@ribose.com"]
 
-  spec.summary       = "Access registry data from Paneron"
-  spec.description   = "Library to access registry data from Paneron."
-  spec.homepage      = "https://github.com/paneron/ruby-paneron_registry"
+  spec.summary       = "Access register data from Paneron"
+  spec.description   = "Library to access register data from Paneron."
+  spec.homepage      = "https://github.com/paneron/ruby-paneron-register"
   spec.license       = "BSD-2-Clause"
 
   spec.files         = `git ls-files -z`.split("\x0").reject do |f|
