@@ -33,6 +33,24 @@
         ];
         commands = [
           {
+            name = "irb";
+            command = "bundle exec irb \"$@\"";
+            help = "Run console IRB (has completion menu)";
+            category = "Ruby";
+          }
+          {
+            name = "console";
+            command = "bundle exec irb \"$@\"";
+            help = "Run console IRB (has completion menu)";
+            category = "Ruby";
+          }
+          {
+            name = "pry";
+            command = "bundle exec pry \"$@\"";
+            help = "Run pry";
+            category = "Ruby";
+          }
+          {
             name = "release";
             command = "bundle exec rake release \"$@\"";
             help = "Run rake release, which adds a tag and pushes to RubyGems";
