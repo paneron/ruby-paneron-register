@@ -1,0 +1,37 @@
+= Paneron Registry Ruby Gem
+
+== Installation
+
+```sh
+gem install paneron-registry
+```
+
+== Usage
+
+```ruby
+require 'paneron-registry'
+
+# Initialize a new registry
+# This example uses a working copy of Paneron's registry.
+registry = PaneronRegistry.new(
+  "/Users/username/Library/Application Support/Electron/working_copies/00000000-0001-0000-0000-000000000001",
+  "register_name-1"
+)
+
+# Get all item class objects
+register.item_class
+
+# Get a specific item class object
+item_class = register.item_class("item-class-1")
+
+# Get all item class objects in Ruby Hash format
+item_class.items_yaml
+
+# Get a specific item property, using normal Ruby Hash methods
+item_class.items_yaml["id"]
+item_class.items_yaml["data"]["blob1"]
+```
+
+== License
+
+See LICENSE.txt
