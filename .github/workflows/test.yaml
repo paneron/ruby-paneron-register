@@ -4,7 +4,16 @@ on:
   push:
     branches: [ master, main ]
     tags: [ v* ]
+    paths-ignore:
+      - '**.md'
+      - '**.adoc'
+      - '.github/workflows/*.yaml'
+      - '!.github/workflows/test.yaml'
   pull_request:
+    paths-ignore:
+      - '**.md'
+      - '**.adoc'
+  workflow_dispatch:
 
 jobs:
   test:
