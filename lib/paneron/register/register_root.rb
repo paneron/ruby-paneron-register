@@ -9,7 +9,7 @@ module Paneron
         self.class.validate_root_path(register_root_path)
         @register_root_path = register_root_path
         @register_root_yaml_path = File.join(register_root_path,
-          REGISTER_ROOT_METADATA_FILENAME)
+                                             REGISTER_ROOT_METADATA_FILENAME)
         @register_names = nil
         @registries = {}
       end
@@ -19,17 +19,17 @@ module Paneron
       def self.validate_root_path(register_root_path)
         unless File.exist?(register_root_path)
           raise Paneron::Register::Error,
-            "Register root path does not exist"
+                "Register root path does not exist"
         end
         unless File.directory?(register_root_path)
           raise Paneron::Register::Error,
-            "Register root path is not a directory"
+                "Register root path is not a directory"
         end
         unless File.exist?(File.join(
-          register_root_path, REGISTER_ROOT_METADATA_FILENAME
-        ))
+                             register_root_path, REGISTER_ROOT_METADATA_FILENAME
+                           ))
           raise Paneron::Register::Error,
-            "Register root metadata file does not exist"
+                "Register root metadata file does not exist"
         end
       end
 
@@ -61,8 +61,8 @@ module Paneron
           end
         else
           @registries[register_name] ||=
-          Paneron::Register::Register.new(register_root_path,
-            register_name)
+            Paneron::Register::Register.new(register_root_path,
+                                            register_name)
         end
       end
 
