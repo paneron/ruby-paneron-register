@@ -1,5 +1,12 @@
 = Paneron Registry Ruby Gem
 
+image:https://img.shields.io/gem/v/paneron_registry.svg["Gem Version", link="https://rubygems.org/gems/paneron_registry"]
+image:https://github.com/paneron/ruby-paneron_registry/actions/workflows/test.yaml/badge.svg["Build Status",Link="https://github.com/paneron/ruby-paneron_registry/actions/workflows/test.yaml"]
+image:https://codeclimate.com/github/paneron/ruby-paneron_registry/badges/gpa.svg["Code Climate", link="https://codeclimate.com/github/paneron/ruby-paneron_registry"]
+image:https://img.shields.io/github/issues-pr-raw/paneron/ruby-paneron_registry.svg["Pull Requests", link="https://github.com/paneron/ruby-paneron_registry/pulls"]
+image:https://img.shields.io/github/commits-since/paneron/ruby-paneron_registry/latest.svg["Commits since latest",link="https://github.com/paneron/ruby-paneron_registry/releases"]
+
+
 == Installation
 
 ```sh
