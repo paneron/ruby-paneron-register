@@ -2,13 +2,14 @@ require "yaml"
 
 module PaneronRegistry
   class RegistryRoot
-    attr_reader :registry_root_path, :registries, :registry_root_yaml_path
+    attr_reader :registry_root_path, :registry_root_yaml_path
 
     def initialize(registry_root_path)
       self.class.validate_root_path(registry_root_path)
       @registry_root_path = registry_root_path
       @registry_root_yaml_path = File.join(registry_root_path,
                                            REGISTER_ROOT_METADATA_FILENAME)
+      @registry_names = nil
       @registries = {}
     end
 
@@ -31,8 +32,8 @@ module PaneronRegistry
       end
     end
 
-    def list_registries
-      Dir.glob(
+    def registry_names
+      @registry_names ||= Dir.glob(
         File.join(
           registry_root_path,
           "*#{PaneronRegistry::Registry::REGISTER_METADATA_FILENAME}",
@@ -51,14 +52,20 @@ module PaneronRegistry
       YAML.safe_load_file(registry_root_yaml_path)
     end
 
-    def get_registry(registry_name)
-      @registries[registry_name] ||=
-        PaneronRegistry::Registry.new(registry_root_path,
-                                      registry_name)
+    def registries(registry_name = nil)
+      if registry_name.nil?
+        registry_names.map do |registry_name|
+          registries(registry_name)
+        end
+      else
+        @registries[registry_name] ||=
+          PaneronRegistry::Registry.new(registry_root_path,
+                                        registry_name)
+      end
     end
 
-    def get_registry_metadata_yaml(registry_name)
-      get_registry(registry_name).get_metadata_yaml
+    def registry_metadata_yaml(registry_name)
+      registires(registry_name).get_metadata_yaml
 
       YAML.safe_load_file(
         registry_yaml_path(registry_name),

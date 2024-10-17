@@ -31,10 +31,10 @@ module PaneronRegistry
         .map { |file| File.basename(file, ".yaml") }
     end
 
-    def item_yaml(uuid = nil)
+    def item_yamls(uuid = nil)
       if uuid.nil?
         item_uuids.map do |uuid|
-          item_yaml(uuid)
+          item_yamls(uuid)
         end
       else
         @items[uuid] ||=

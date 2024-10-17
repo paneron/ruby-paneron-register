@@ -13,17 +13,17 @@ RSpec.describe PaneronRegistry::ItemClass do
   end
 
   it "lists out correct number of item YAML" do
-    expect(item_class.item_yaml.length).to be(3)
+    expect(item_class.item_yamls.length).to be(3)
   end
 
   it "lists out item YAML" do
-    item_class.item_yaml.each do |item|
+    item_class.item_yamls.each do |item|
       expect(item).to be_instance_of(Hash)
     end
   end
 
   it "retains item YAML properties" do
-    item_class.item_yaml.each do |item|
+    item_class.item_yamls.each do |item|
       expect(item["id"]).to be_instance_of(String)
       expect(item["data"]).to be_instance_of(Hash)
       expect(item["data"]["blob1"]).to be_instance_of(String)

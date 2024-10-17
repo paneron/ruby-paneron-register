@@ -13,13 +13,19 @@ RSpec.describe PaneronRegistry::Registry do
     end
 
     it "retrieves item classes" do
-      registry.item_class.each do |item_class|
+      registry.item_classes.each do |item_class|
         expect(item_class).to be_instance_of(PaneronRegistry::ItemClass)
       end
     end
 
     it "lists out item UUIDs" do
       expect(registry.item_uuids.length).to be(9)
+    end
+
+    it "retrieves a specific item class" do
+      expect(registry.item_classes("item-class-1")).to be_instance_of(
+        PaneronRegistry::ItemClass,
+      )
     end
   end
 

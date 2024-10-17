@@ -37,10 +37,10 @@ module PaneronRegistry
       end
     end
 
-    def item_class(item_class_name = nil)
+    def item_classes(item_class_name = nil)
       if item_class_name.nil?
         item_class_names.map do |item_class_name|
-          item_class(item_class_name)
+          item_classes(item_class_name)
         end
       else
         @item_classes[item_class_name] ||=
@@ -57,7 +57,7 @@ module PaneronRegistry
     end
 
     def item_uuids
-      item_class.map(&:item_uuids).flatten
+      item_classes.map(&:item_uuids).flatten
     end
 
     def get_metadata_yaml

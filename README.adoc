@@ -20,23 +20,29 @@ require 'paneron-registry'
 
 # Initialize a new registry
 # This example uses a working copy of Paneron's registry.
-registry = PaneronRegistry.new(
+registry = PaneronRegistry::Registry.new(
   "/Users/username/Library/Application Support/Electron/working_copies/00000000-0001-0000-0000-000000000001",
   "register_name-1"
 )
 
+# Alternatively, initialize a new registry root:
+root = PaneronRegistry::RegistryRoot.new(
+  "/Users/username/Library/Application Support/Electron/working_copies/00000000-0001-0000-0000-000000000001",
+)
+registry = root.registries("register_name-1")
+
 # Get all item class objects
-register.item_class
+register.item_classes
 
 # Get a specific item class object
-item_class = register.item_class("item-class-1")
+item_class = register.item_classes("item-class-1")
 
 # Get all item class objects in Ruby Hash format
-item_class.items_yaml
+item_class.items_yamls
 
 # Get a specific item property, using normal Ruby Hash methods
-item_class.items_yaml["id"]
-item_class.items_yaml["data"]["blob1"]
+id = item_class.items_yamls["id"]
+blob1 = item_class.items_yamls["data"]["blob1"]
 ```
 
 == License

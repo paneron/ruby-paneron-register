@@ -24,8 +24,18 @@ RSpec.describe PaneronRegistry::RegistryRoot do
       )
     end
 
-    it "lists out registries" do
-      expect(root.list_registries).to contain_exactly(
+    it "retrieves registry objects" do
+      root.registries.each do |registry|
+        expect(registry).to be_instance_of(PaneronRegistry::Registry)
+      end
+    end
+
+    it "retrieves a specific registry object" do
+      expect(root.registries("reg-1")).to be_instance_of(PaneronRegistry::Registry)
+    end
+
+    it "lists out registry names" do
+      expect(root.registry_names).to contain_exactly(
         "reg-1",
         "reg-2",
         "reg-3",
@@ -33,7 +43,7 @@ RSpec.describe PaneronRegistry::RegistryRoot do
     end
 
     it "gets registry metadata" do
-      expect(root.get_registry("reg-1")).to be_instance_of(
+      expect(root.registries("reg-1")).to be_instance_of(
         PaneronRegistry::Registry,
       )
     end
