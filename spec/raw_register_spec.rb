@@ -1,16 +1,18 @@
 # frozen_string_literal: true
 
 RSpec.describe Paneron::Register::Raw::Register do
-  it "detects invalid register path on initialization" do
-    expect do
-      described_class.new("spec/fixtures/doesnotexist")
-    end.to raise_error Paneron::Register::Error
-  end
+  describe "#initialize" do
+    it "raises Paneron::Register::Error on invalid path" do
+      expect do
+        described_class.new("spec/fixtures/doesnotexist")
+      end.to raise_error Paneron::Register::Error
+    end
 
-  it "allows valid register path on initialization" do
-    register =
-      described_class.new("spec/fixtures/test-register")
-    expect(register).to be_instance_of described_class
+    it "accepts a valid path" do
+      expect do
+        described_class.new("spec/fixtures/test-register")
+      end.not_to raise_error
+    end
   end
 
   describe "with a valid register repository" do
@@ -18,26 +20,31 @@ RSpec.describe Paneron::Register::Raw::Register do
       described_class.new("spec/fixtures/test-register")
     end
 
-    it "gets register metadata" do
-      expect(register.get_metadata).to eql(
+    describe "#metadata" do
+      subject(:metadata) { register.metadata }
+      let(:expected_hash) do
         {
-          "datasets" => { "reg-1" => true },
+          "datasets" => { "reg-1" => true, "reg-2" => true, "reg-3" => true },
           "title" => "register",
-        },
-      )
+        }
+      end
+      it { is_expected.to eql(expected_hash) }
     end
 
-    it "retrieves data sets as a Hash" do
-      expect(register.data_sets).to be_instance_of(Hash)
-    end
+    describe "#data_sets" do
+      subject(:data_sets) { register.data_sets }
 
-    it "retrieves all data sets" do
-      expect(register.data_sets.length).to be 3
-    end
+      it { is_expected.to be_instance_of(Hash) }
+      its(:length) { is_expected.to eql(3) }
 
-    it "retrieves data set objects" do
-      register.data_sets.each_pair do |_data_set_name, data_set|
-        expect(data_set).to be_instance_of(Paneron::Register::Raw::DataSet)
+      describe "each item" do
+        it "is a Paneron::Register::Raw::DataSet object" do
+          data_sets.each_pair do |_data_set_name, data_set|
+            expect(data_set).to be_instance_of(
+              Paneron::Register::Raw::DataSet,
+            )
+          end
+        end
       end
     end
 
@@ -47,18 +54,26 @@ RSpec.describe Paneron::Register::Raw::Register do
       )
     end
 
-    it "lists out data set names" do
-      expect(register.data_set_names).to contain_exactly(
-        "reg-1",
-        "reg-2",
-        "reg-3",
-      )
+    describe "#data_set_names" do
+      subject(:data_set_names) { register.data_set_names }
+
+      it { is_expected.to be_instance_of(Array) }
+      its(:length) { is_expected.to eql(3) }
+      it {
+        is_expected.to contain_exactly(
+          "reg-1",
+          "reg-2",
+          "reg-3",
+        )
+      }
     end
 
-    it "gets data set metadata" do
-      expect(register.data_sets("reg-1")).to be_instance_of(
-        Paneron::Register::Raw::DataSet,
-      )
+    describe "#to_lutaml" do
+      it "returns a Paneron::Register::Register object" do
+        expect(register.to_lutaml).to be_instance_of(
+          Paneron::Register::Register,
+        )
+      end
     end
   end
 end

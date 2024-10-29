@@ -6,14 +6,19 @@ module Paneron
   module Register
     module Raw
       class ItemClass
-        attr_reader :register_path, :register_root_path, :register_yaml_path,
-                    :item_class_name, :item_class_path, :register_name
+        attr_reader :data_set_path,
+                    :item_class_name, :item_class_path, :extension
 
-        def initialize(register_root_path, register_name, item_class_name)
-          File.join(register_root_path, register_name)
-          item_class_path = File.join(register_root_path, register_name,
-                                      item_class_name)
+        def initialize(
+          data_set_path,
+          item_class_name,
+          extension = "yaml"
+        )
+          item_class_path = File.join(data_set_path, item_class_name)
           self.class.validate_item_class_path(item_class_path)
+          @extension = extension
+          @data_set_path = data_set_path
+          @item_class_name = item_class_name
           @item_class_path = item_class_path
           @items_uuids = nil
           @items = {}
@@ -30,24 +35,34 @@ module Paneron
           end
         end
 
-        def item_uuids
-          @item_uuids ||= Dir.glob(File.join(item_class_path, "*.yaml"))
-            .map { |file| File.basename(file, ".yaml") }
+        def to_lutaml
+          Paneron::Register::ItemClass.new(
+            name: item_class_name,
+            items: item_lutamls,
+          )
         end
 
-        def item_yamls(uuid = nil)
+        def item_uuids
+          @item_uuids ||= Dir.glob(File.join(item_class_path, "*.#{extension}"))
+            .map { |file| File.basename(file, ".#{extension}") }
+        end
+
+        def items(uuid = nil)
           if uuid.nil?
             item_uuids.reduce({}) do |acc, uuid|
-              acc[uuid] = item_yamls(uuid)
+              acc[uuid] = items(uuid)
               acc
             end
           else
             @items[uuid] ||=
-              YAML.safe_load_file(
-                File.join(item_class_path, "#{uuid}.yaml"),
-                permitted_classes: [Time],
+              Paneron::Register::Raw::Item.new(
+                item_class_path, uuid
               )
           end
+        end
+
+        def item_lutamls
+          items.values.map(&:to_lutaml)
         end
       end
     end

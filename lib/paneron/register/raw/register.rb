@@ -15,6 +15,7 @@ module Paneron
                                           REGISTER_METADATA_FILENAME)
           @data_set_names = nil
           @data_sets = {}
+          @metadata = nil
         end
 
         REGISTER_METADATA_FILENAME = "/paneron.yaml"
@@ -36,6 +37,13 @@ module Paneron
           end
         end
 
+        def to_lutaml
+          Paneron::Register::Register.new(
+            data_sets: data_set_lutamls,
+            metadata: metadata.to_json,
+          )
+        end
+
         def data_set_names
           @data_set_names ||= Dir.glob(
             File.join(
@@ -52,8 +60,8 @@ module Paneron
           File.join(register_path, data_set_name)
         end
 
-        def get_metadata
-          YAML.safe_load_file(register_yaml_path)
+        def metadata
+          @metadata ||= YAML.safe_load_file(register_yaml_path)
         end
 
         def data_sets(data_set_name = nil)
@@ -69,13 +77,10 @@ module Paneron
           end
         end
 
-        def data_set_metadata_yaml(data_set_name)
-          data_sets(data_set_name).get_metadata_yaml
-
-          YAML.safe_load_file(
-            data_set_yaml_path(data_set_name),
-            permitted_classes: [Time],
-          )
+        def data_set_lutamls
+          data_sets.map do |_data_set_name, data_set|
+            data_set.to_lutaml
+          end
         end
       end
     end

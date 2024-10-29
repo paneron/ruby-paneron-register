@@ -20,29 +20,58 @@ require "paneron/register"
 
 # Initialize a new data set
 # This example uses a working copy of Paneron's data set.
-data_set = Paneron::Register::Raw::DataSet.new(
+# => Paneron::Register::Raw::DataSet
+raw_data_set = Paneron::Register::Raw::DataSet.new(
   "/Users/username/Library/Application Support/Electron/working_copies/00000000-0001-0000-0000-000000000001",
   "data_set_name-1"
 )
 
+# => Paneron::Register::DataSet < Lutaml::Model::Serializable
+data_set = raw_data_set.to_lutaml
+
 # Alternatively, initialize a new register:
-register = Paneron::Register::Raw::Register.new(
+# => Paneron::Register::Raw::Register
+raw_register = Paneron::Register::Raw::Register.new(
   "/Users/username/Library/Application Support/Electron/working_copies/00000000-0001-0000-0000-000000000001",
 )
-data_set = register.data_sets("data_set_name-1")
+# => Paneron::Register::Raw::DataSet
+raw_data_set = raw_register.data_sets("data_set_name-1")
+
+# => Paneron::Register::DataSet < Lutaml::Model::Serializable
+data_set = raw_data_set.to_lutaml
 
 # Get all item class objects
+# => { item-class-name: Paneron::Register::Raw::ItemClass }
+raw_data_set.item_classes
+
+# => [ Paneron::Register::ItemClass ]
 data_set.item_classes
 
 # Get a specific item class object
-item_class = data_set.item_classes("item-class-1")
+# => Paneron::Register::Raw::ItemClass
+raw_item_class = raw_data_set.item_classes("item-class-1")
 
-# Get all item class objects in Ruby Hash format
-item_class.items_yamls
+# => Paneron::Register::ItemClass < Lutaml::Model::Serializable
+item_class = raw_item_class.to_lutaml
+
+# Get all item objects in Ruby Hash format
+# => { item-uuid: Paneron::Register::Raw::Item }
+raw_item_class.items
+
+# => [ Paneron::Register::Item ]
+item_class.items
 
 # Get a specific item property, using normal Ruby Hash methods
-id = item_class.items_yamls["id"]
-blob1 = item_class.items_yamls["data"]["blob1"]
+# => Paneron::Register::Raw::Item
+raw_item = raw_item_class.items["00000000-0000-0000-0000-000000000001"]
+id = raw_item["id"]
+blob1 = raw_item["data"]["blob1"]
+
+# Get a specific item property, from a Lutaml object
+# => Paneron::Register::Item < Lutaml::Model::Serializable
+item = raw_item.to_lutaml
+id = item.to_h["id"]
+blob1 = item.to_h["data"]["blob1"]
 ```
 
 == License
