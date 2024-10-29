@@ -27,6 +27,8 @@ Gem::Specification.new do |spec|
 
   # spec.add_runtime_dependency "yaml"
 
+  spec.add_runtime_dependency "lutaml-model", "~> 0.3.18"
+
   spec.add_development_dependency "debug"
   spec.add_development_dependency "pry"
   spec.add_development_dependency "rake", "~> 13.0"

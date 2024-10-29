@@ -4,8 +4,8 @@ require "lutaml/model"
 
 module Paneron
   module Register
-    class ItemClass < Lutaml::Model::Serializable
-      attribute :uuid, Lutaml::Model::Type::String
+    class ProposalState < Lutaml::Model::Serializable
+      attribute :state, :string
     end
   end
 end
