@@ -18,6 +18,72 @@ module Paneron
           @metadata = nil
         end
 
+        def self.local_cache_path
+          case RUBY_PLATFORM
+          when /darwin/
+            File.join(
+              `command getconf DARWIN_USER_CACHE_DIR`.chomp,
+              "com.paneron.ruby-paneron-register",
+            )
+          else
+            File.join(
+              Dir.exist?(ENV["XDG_CACHE_HOME"]) ? ENV["XDG_CACHE_HOME"] : "~/.cache",
+              "ruby-paneron-register",
+            )
+          end
+        end
+
+        def self.setup_cache_path
+          if !Dir.exist?(local_cache_path)
+            require "fileutils"
+            FileUtils.mkdir_p(local_cache_path)
+          end
+        end
+
+        def self.calculate_repo_cache_hash(repo_url)
+          require "digest"
+          require "base64"
+          digest = [Digest::SHA1.hexdigest(repo_url)].pack("H*")
+          Base64.encode64(digest).tr("+/= ", "_-")[0..16]
+        end
+
+        def self.from_git(repo_url, update: true)
+          require "git"
+          setup_cache_path
+          repo_cache_name =
+            "#{File.basename(repo_url)}-#{calculate_repo_cache_hash(repo_url)}"
+
+          # Check if repo is already cloned
+          full_local_cache_path = File.join(local_cache_path, repo_cache_name)
+          g = begin
+            if File.exist?(full_local_cache_path)
+              _g = Git.open(full_local_cache_path)
+
+              # Pull-rebase to update it
+              if update
+                _g.pull(
+                  nil, nil, rebase: true
+                )
+              end
+              _g
+            else
+              Git.clone(
+                repo_url,
+                repo_cache_name,
+                path: local_cache_path,
+                # timeout: 30,
+              )
+            end
+          rescue Git::TimeoutError => e
+            e.result.tap do |_r|
+              warn "Timed out trying to clone #{repo_url}."
+              raise e
+            end
+          end
+
+          new(g.dir.path)
+        end
+
         REGISTER_METADATA_FILENAME = "/paneron.yaml"
 
         def self.validate_path(register_path)

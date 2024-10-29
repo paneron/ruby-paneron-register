@@ -34,6 +34,16 @@ data_set = raw_data_set.to_lutaml
 raw_register = Paneron::Register::Raw::Register.new(
   "/Users/username/Library/Application Support/Electron/working_copies/00000000-0001-0000-0000-000000000001",
 )
+
+# This example uses a Git URL
+# => Paneron::Register::Raw::Register
+raw_register = Paneron::Register::Raw::Register.from_git(
+  "https://github.com/isogr/registry",
+
+  # optional.  For previously cloned repos, pulls from repo iff true.
+  # update: true,
+)
+
 # => Paneron::Register::Raw::DataSet
 raw_data_set = raw_register.data_sets("data_set_name-1")
 
