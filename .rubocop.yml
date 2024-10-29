@@ -12,7 +12,11 @@ Layout/LineLength:
 Metrics/MethodLength:
   Enabled: true
   CountAsOne: ["array", "hash", "heredoc", "method_call"]
-  Max: 15
+  Max: 35
+
+Metrics/AbcSize:
+  Enabled: true
+  Max: 20
 
 Metrics/BlockLength:
   Enabled: true
