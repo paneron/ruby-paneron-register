@@ -7,6 +7,7 @@ inherit_from:
 Layout/LineLength:
   Enabled: true
   AllowedPatterns: ["^\\s*#"]
+  Max: 95
 
 Metrics/MethodLength:
   Enabled: true
