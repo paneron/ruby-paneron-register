@@ -18,24 +18,24 @@ gem install paneron-register
 ```ruby
 require "paneron/register"
 
-# Initialize a new register
-# This example uses a working copy of Paneron's register.
-register = Paneron::Register::Register.new(
+# Initialize a new data set
+# This example uses a working copy of Paneron's data set.
+data_set = Paneron::Register::Raw::DataSet.new(
   "/Users/username/Library/Application Support/Electron/working_copies/00000000-0001-0000-0000-000000000001",
-  "register_name-1"
+  "data_set_name-1"
 )
 
-# Alternatively, initialize a new register root:
-root = Paneron::Register::RegisterRoot.new(
+# Alternatively, initialize a new register:
+register = Paneron::Register::Raw::Register.new(
   "/Users/username/Library/Application Support/Electron/working_copies/00000000-0001-0000-0000-000000000001",
 )
-register = root.registries("register_name-1")
+data_set = register.data_sets("data_set_name-1")
 
 # Get all item class objects
-register.item_classes
+data_set.item_classes
 
 # Get a specific item class object
-item_class = register.item_classes("item-class-1")
+item_class = data_set.item_classes("item-class-1")
 
 # Get all item class objects in Ruby Hash format
 item_class.items_yamls

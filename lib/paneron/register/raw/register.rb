@@ -6,25 +6,20 @@ module Paneron
   module Register
     module Raw
       class Register
-        attr_reader :register_path, :register_root_path, :register_yaml_path,
-                    :register_name
+        attr_reader :register_path, :register_yaml_path
 
-        def initialize(register_root_path, register_name)
-          register_path = File.join(register_root_path, register_name)
-          self.class.validate_register_path(register_path)
-          @register_name = register_name
-          @register_root_path = register_root_path
+        def initialize(register_path)
+          self.class.validate_path(register_path)
           @register_path = register_path
           @register_yaml_path = File.join(register_path,
                                           REGISTER_METADATA_FILENAME)
-          @item_classes = {}
-          @item_class_names = nil
-          @item_uuids = nil
+          @data_set_names = nil
+          @data_sets = {}
         end
 
-        REGISTER_METADATA_FILENAME = "/register.yaml"
+        REGISTER_METADATA_FILENAME = "/paneron.yaml"
 
-        def self.validate_register_path(register_path)
+        def self.validate_path(register_path)
           unless File.exist?(register_path)
             raise Paneron::Register::Error,
                   "Register path does not exist"
@@ -41,33 +36,44 @@ module Paneron
           end
         end
 
-        def item_classes(item_class_name = nil)
-          if item_class_name.nil?
-            item_class_names.reduce({}) do |acc, item_class_name|
-              acc[item_class_name] = item_classes(item_class_name)
+        def data_set_names
+          @data_set_names ||= Dir.glob(
+            File.join(
+              register_path,
+              "*#{Paneron::Register::Raw::DataSet::DATA_SET_METADATA_FILENAME}",
+            ),
+          )
+            .map do |file|
+              File.basename(File.dirname(file))
+            end
+        end
+
+        def data_set_path(data_set_name)
+          File.join(register_path, data_set_name)
+        end
+
+        def get_metadata
+          YAML.safe_load_file(register_yaml_path)
+        end
+
+        def data_sets(data_set_name = nil)
+          if data_set_name.nil?
+            data_set_names.reduce({}) do |acc, data_set_name|
+              acc[data_set_name] = data_sets(data_set_name)
               acc
             end
           else
-            @item_classes[item_class_name] ||=
-              Paneron::Register::Raw::ItemClass.new(
-                register_root_path, register_name, item_class_name
-              )
+            @data_sets[data_set_name] ||=
+              Paneron::Register::Raw::DataSet.new(register_path,
+                                                  data_set_name)
           end
         end
 
-        def item_class_names
-          @item_class_names ||=
-            Dir.glob(File.join(register_path, "*/*.yaml"))
-              .map { |file| File.basename(File.dirname(file)) }.uniq
-        end
+        def data_set_metadata_yaml(data_set_name)
+          data_sets(data_set_name).get_metadata_yaml
 
-        def item_uuids
-          item_classes.values.map(&:item_uuids).flatten
-        end
-
-        def get_metadata_yaml
           YAML.safe_load_file(
-            register_yaml_path,
+            data_set_yaml_path(data_set_name),
             permitted_classes: [Time],
           )
         end

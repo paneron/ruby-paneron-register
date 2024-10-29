@@ -1,4 +1,4 @@
-name: Test Register 3
+name: Test Data Set 3
 stakeholders:
   - roles:
       - submitter
@@ -27,7 +27,7 @@ version:
   timestamp: 2024-01-01T07:00:00.000Z
 contentSummary: >-
   <p>
-  This is a test register.
+  This is a test data set.
   </p>
 
 operatingLanguage:

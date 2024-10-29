@@ -1,92 +1,64 @@
 # frozen_string_literal: true
 
 RSpec.describe Paneron::Register::Raw::Register do
-  let(:register) do
-    Paneron::Register::Raw::Register.new("spec/fixtures/test-register", "reg-1")
+  it "detects invalid register path on initialization" do
+    expect do
+      described_class.new("spec/fixtures/doesnotexist")
+    end.to raise_error Paneron::Register::Error
   end
 
-  describe "item classes" do
-    it "lists out item classes" do
-      expect(register.item_class_names).to contain_exactly(
-        "item-class-1",
-        "item-class-2",
-        "item-class-3",
+  it "allows valid register path on initialization" do
+    register =
+      described_class.new("spec/fixtures/test-register")
+    expect(register).to be_instance_of described_class
+  end
+
+  describe "with a valid register repository" do
+    let(:register) do
+      described_class.new("spec/fixtures/test-register")
+    end
+
+    it "gets register metadata" do
+      expect(register.get_metadata).to eql(
+        {
+          "datasets" => { "reg-1" => true },
+          "title" => "register",
+        },
       )
     end
 
-    it "retrieves item classes as a Hash" do
-      expect(register.item_classes).to be_instance_of(Hash)
+    it "retrieves data sets as a Hash" do
+      expect(register.data_sets).to be_instance_of(Hash)
     end
 
-    it "retrieves item classes" do
-      register.item_classes.each_pair do |_item_class_name, item_class|
-        expect(item_class).to be_instance_of(Paneron::Register::Raw::ItemClass)
+    it "retrieves all data sets" do
+      expect(register.data_sets.length).to be 3
+    end
+
+    it "retrieves data set objects" do
+      register.data_sets.each_pair do |_data_set_name, data_set|
+        expect(data_set).to be_instance_of(Paneron::Register::Raw::DataSet)
       end
     end
 
-    it "lists out item UUIDs" do
-      expect(register.item_uuids.length).to be(9)
-    end
-
-    it "retrieves a specific item class" do
-      expect(register.item_classes("item-class-1")).to be_instance_of(
-        Paneron::Register::Raw::ItemClass,
+    it "retrieves a specific data set object" do
+      expect(register.data_sets("reg-1")).to be_instance_of(
+        Paneron::Register::Raw::DataSet,
       )
     end
-  end
 
-  it "gets register metadata" do
-    expect(register.get_metadata_yaml).to eql(
-      {
-        "contentSummary" => "<p> This is a test register. </p>",
-        "name" => "Test Register 1",
-        "operatingLanguage" => {
-          "country" => "N/A",
-          "languageCode" => "eng",
-          "name" => "English",
-        },
-        "organizations" => {
-          "00000000-000a-000b-000c-000000000000" => {
-            "logoURL" => "",
-            "name" => "Stake Holdings, Inc.",
-          },
-        },
-        "stakeholders" => [
-          {
-            "contacts" => [
-              {
-                "label" => "email",
-                "value" => "stakeholder1@example.com",
-              },
-            ],
-            "gitServerUsername" => "stakeholder1",
-            "name" => "Stake Holder 1",
-            "roles" => ["submitter",
-                        "manager",
-                        "control-body-reviewer",
-                        "control-body",
-                        "owner"],
-          },
-          {
-            "affiliations" => {
-              "00000000-000a-000b-000c-000000000000" => {
-                "role" => "member",
-              },
-            },
-            "contacts" => [{
-              "label" => "email",
-              "value" => "stakeholder2@example.com",
-            }],
-            "gitServerUsername" => "stakeholder2",
-            "name" => "Stake Holder 2",
-            "roles" => ["owner", "manager"],
-          },
-        ],
-        "version" => {
-          "id" => "1.1",
-          "timestamp" => Time.parse("2024-01-01 07:00:00.000000000 +0000"),
-        },
-      },
-    )
+    it "lists out data set names" do
+      expect(register.data_set_names).to contain_exactly(
+        "reg-1",
+        "reg-2",
+        "reg-3",
+      )
+    end
+
+    it "gets data set metadata" do
+      expect(register.data_sets("reg-1")).to be_instance_of(
+        Paneron::Register::Raw::DataSet,
+      )
+    end
   end
 end

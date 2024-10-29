@@ -1,10 +1,14 @@
+# frozen_string_literal: true
+
+require "yaml"
+
 require "lutaml/model"
 
 module Paneron
   module Register
     class Register < Lutaml::Model::Serializable
-      attribute :name, Lutaml::Model::Type::String
-      attribute :item_classes, Paneron::Register::ItemClass, collection: true
+      attribute :data_sets, Paneron::Register::DataSet, collection: true
+      attribute :metadata, Lutaml::Model::Type::String
     end
   end
 end
