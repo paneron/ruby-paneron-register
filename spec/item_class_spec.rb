@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe Paneron::Register::ItemClass do
   let(:item_class) do
     Paneron::Register::ItemClass.new("spec/fixtures/test-register", "reg-1",
