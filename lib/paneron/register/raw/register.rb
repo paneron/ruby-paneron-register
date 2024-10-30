@@ -1,21 +1,102 @@
 # frozen_string_literal: true
 
 require "yaml"
+require "set"
 
 module Paneron
   module Register
     module Raw
       class Register
-        attr_reader :register_path, :register_yaml_path
+        include Writeable
+        include Validatable
 
-        def initialize(register_path)
-          self.class.validate_path(register_path)
+        attr_reader :git_client, :git_url
+        attr_accessor :register_path
+
+        def initialize(
+          register_path,
+          git_url: nil,
+          git_client: nil
+        )
+          @git_url = git_url
+          @git_client = git_client
+
           @register_path = register_path
-          @register_yaml_path = File.join(register_path,
-                                          REGISTER_METADATA_FILENAME)
+          @old_path = @register_path
           @data_set_names = nil
           @data_sets = {}
           @metadata = nil
+        end
+
+        def register_yaml_path
+          File.join(register_path,
+                    REGISTER_METADATA_FILENAME)
+        end
+
+        def parent; nil; end
+
+        def self.name
+          "Register"
+        end
+
+        def save_sequence
+          # Save self
+          require "fileutils"
+
+          # Move old register to new path
+          if File.directory?(@old_path) && @old_path != self_path
+            FileUtils.mv(@old_path, self_path)
+            @old_path = self_path
+          else
+            FileUtils.mkdir_p(self_path)
+          end
+
+          if @metadata.nil? || @metadata.empty?
+            File.write(register_yaml_path, self.class.metadata_template.to_yaml)
+          else
+            File.write(register_yaml_path, metadata.to_yaml)
+          end
+
+          # Save data sets
+          data_set_names.each do |data_set_name|
+            new_thing = data_sets(data_set_name)
+            new_thing.register = self
+            new_thing.save
+          end
+          # else
+          #   raise Paneron::Register::Error, "Register is not valid"
+          # end
+        end
+
+        def self_path
+          register_path
+        end
+
+        def is_valid?
+          true
+        end
+
+        def add_data_sets(*new_data_sets)
+          new_data_sets = [new_data_sets] unless new_data_sets.is_a?(Enumerable)
+          new_data_sets.each do |data_set|
+            data_set.set_register(self)
+            @data_sets[data_set.data_set_name] = data_set
+            data_set_names << data_set.data_set_name
+            metadata.merge!("data_sets" => { data_set.data_set_name => true })
+          end
+        end
+
+        def spawn_data_set(data_set_name, metadata: {})
+          new_data_set =
+            @data_sets[data_set_name] =
+              Paneron::Register::Raw::DataSet.new(
+                File.join(register_path, data_set_name),
+                register: self,
+              )
+
+          data_set_names << data_set_name
+          new_data_set.metadata = metadata
+          new_data_set
         end
 
         def self.local_cache_path
@@ -81,25 +162,32 @@ module Paneron
             end
           end
 
-          new(g.dir.path)
+          new(g.dir.path, git_url: repo_url, git_client: g)
         end
 
         REGISTER_METADATA_FILENAME = "/paneron.yaml"
 
-        def self.validate_path(register_path)
-          unless File.exist?(register_path)
+        def self.validate_path_before_saving
+          false
+        end
+
+        def self.validate_path(path)
+          unless File.exist?(path)
             raise Paneron::Register::Error,
-                  "Register path does not exist"
+                  "#{name} path (#{path}) does not exist"
           end
-          unless File.directory?(register_path)
+
+          unless File.directory?(path)
             raise Paneron::Register::Error,
-                  "Register path is not a directory"
+                  "#{name} path (#{path}) is not a directory"
           end
-          unless File.exist?(File.join(
-                               register_path, REGISTER_METADATA_FILENAME
-                             ))
+
+          register_file = File.join(
+            path, REGISTER_METADATA_FILENAME
+          )
+          unless File.exist?(register_file)
             raise Paneron::Register::Error,
-                  "Register metadata file does not exist"
+                  "Register metadata file (#{register_file}) does not exist"
           end
         end
 
@@ -119,7 +207,7 @@ module Paneron
           )
             .map do |file|
               File.basename(File.dirname(file))
-            end
+            end.to_set
         end
 
         def data_set_path(data_set_name)
@@ -127,7 +215,14 @@ module Paneron
         end
 
         def metadata
-          @metadata ||= YAML.safe_load_file(register_yaml_path)
+          @metadata ||= YAML.safe_load_file(
+            register_yaml_path,
+            permitted_classes: [Time, Date, DateTime],
+          )
+        end
+
+        def metadata=(metadata)
+          @metadata = metadata
         end
 
         def data_sets(data_set_name = nil)
@@ -138,10 +233,23 @@ module Paneron
             end
           else
             @data_sets[data_set_name] ||=
-              Paneron::Register::Raw::DataSet.new(register_path,
-                                                  data_set_name)
+              Paneron::Register::Raw::DataSet.new(
+                File.join(register_path, data_set_name),
+                register: self,
+              )
           end
         end
+
+        def self.metadata_template
+          {
+            "title" => "",
+            "datasets" => {
+              # "data-set-1" => true,
+            },
+          }
+        end
+
+        private
 
         def data_set_lutamls
           data_sets.map do |_data_set_name, data_set|

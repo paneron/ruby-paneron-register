@@ -1,28 +1,142 @@
 # frozen_string_literal: true
 
 RSpec.describe Paneron::Register::Raw::DataSet do
-  describe "#initialize" do
-    it "raises Paneron::Register::Error on invalid path" do
-      expect do
-        described_class.new(
-          "spec/fixtures/test-registerDOESNOTEXIST",
-          "reg-1",
-        )
-      end.to raise_error Paneron::Register::Error
+  let(:raw_register) do
+    Paneron::Register::Raw::Register.new(
+      "spec/fixtures/test-register",
+    )
+  end
+
+  describe "#save" do
+    let(:old_data_set_name) do
+      "ds-a"
     end
 
+    let(:new_data_set_name) do
+      "ds-b"
+    end
+
+    let(:raw_data_set) do
+      ds = raw_register.spawn_data_set(old_data_set_name)
+      ds
+    end
+
+    let(:old_data_set_path) do
+      File.join(
+        raw_register.register_path,
+        old_data_set_name,
+      )
+    end
+
+    let(:new_data_set_path) do
+      File.join(
+        raw_register.register_path,
+        new_data_set_name,
+      )
+    end
+
+    it "saves to a new path" do
+      expect do
+        raw_data_set.data_set_name = new_data_set_name
+        raw_data_set.save
+      end.to change { File.directory?(new_data_set_path) }.from(false).to(true)
+    end
+
+    it "moves to a new path" do
+      raw_data_set.data_set_name = old_data_set_name
+      raw_data_set.save
+      expect do
+        raw_data_set.data_set_name = new_data_set_name
+        raw_data_set.save
+      end.to change {
+               [
+                 old_data_set_path,
+                 new_data_set_path,
+               ].map { |path| File.directory?(path) }
+             }.from([true, false]).to([false, true])
+    end
+  end
+
+  describe "#add_item_classes" do
+    let(:raw_data_set) do
+      ds = raw_register.spawn_data_set("asdfnonexist")
+      ds
+    end
+
+    let(:new_item_class) do
+      Paneron::Register::Raw::ItemClass.new(
+        "random/nonexistent/ic-a",
+      )
+    end
+
+    it "adds the new ItemClass object into its collection" do
+      expect do
+        raw_data_set.add_item_classes(new_item_class)
+      end.to change { raw_data_set.item_classes.length }.by(1)
+    end
+
+    it "change the ItemClass's DataSet to self" do
+      expect do
+        raw_data_set.add_item_classes(new_item_class)
+      end.to change {
+               new_item_class.data_set_path
+             }.from("random/nonexistent").to(raw_data_set.data_set_path)
+    end
+  end
+
+  describe "#spawn_item_class" do
+    let(:raw_data_set) do
+      ds = raw_register.spawn_data_set("asdfnonexist")
+      ds
+    end
+
+    it "creates a new ItemClass object" do
+      expect do
+        raw_data_set.spawn_item_class("ic-a")
+        raw_data_set.spawn_item_class("ic-a")
+        raw_data_set.spawn_item_class("ic-a")
+      end.to change { raw_data_set.item_classes.length }.by(1)
+    end
+
+    it "creates new ItemClass objects" do
+      expect do
+        raw_data_set.spawn_item_class("ic-a")
+        raw_data_set.spawn_item_class("ic-b")
+        raw_data_set.spawn_item_class("ic-c")
+      end.to change { raw_data_set.item_classes.length }.by(3)
+    end
+  end
+
+  describe "#path_valid?" do
+    describe "with an invalid path" do
+      subject do
+        described_class.new("spec/fixtures/test-register/doesnotexist")
+      end
+
+      it { is_expected.to_not be_path_valid }
+    end
+
+    describe "with a valid path" do
+      subject do
+        described_class.new("spec/fixtures/test-register/reg-1")
+      end
+
+      it { is_expected.to be_path_valid }
+    end
+  end
+
+  describe "#initialize" do
     it "accepts a valid path" do
       expect do
         described_class.new(
-          "spec/fixtures/test-register",
-          "reg-1",
+          "spec/fixtures/test-register/reg-1",
         )
       end.not_to raise_error
     end
   end
 
   let(:data_set) do
-    described_class.new("spec/fixtures/test-register", "reg-1")
+    described_class.new("spec/fixtures/test-register/reg-1")
   end
 
   describe "#item_class_names" do

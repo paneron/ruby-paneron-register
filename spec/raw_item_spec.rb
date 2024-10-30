@@ -1,21 +1,36 @@
 # frozen_string_literal: true
 
 RSpec.describe Paneron::Register::Raw::Item do
-  describe "#initialize" do
-    it "raises Paneron::Register::Error on invalid path" do
-      expect do
+  describe "#valid?" do
+    describe "with an invalid path" do
+      subject do
         described_class.new(
-          "spec/fixtures/test-register/reg-1/doesnotexist",
-          "00000000-0000-0000-0000-000000000001",
+          "1",
+          "spec/fixtures/test-register/doesnotexist/item-class-1",
         )
-      end.to raise_error Paneron::Register::Error
+      end
+
+      it { is_expected.to_not be_path_valid }
     end
 
+    describe "with a valid path" do
+      subject do
+        described_class.new(
+          "00000000-0000-0000-0000-000000000001",
+          "spec/fixtures/test-register/reg-1/item-class-1",
+        )
+      end
+
+      it { is_expected.to be_path_valid }
+    end
+  end
+
+  describe "#initialize" do
     it "accepts a valid path" do
       expect do
         described_class.new(
-          "spec/fixtures/test-register/reg-1/item-class-1",
           "00000000-0000-0000-0000-000000000001",
+          "spec/fixtures/test-register/reg-1/item-class-1",
         )
       end.not_to raise_error
     end
@@ -23,8 +38,8 @@ RSpec.describe Paneron::Register::Raw::Item do
 
   let(:item) do
     described_class.new(
-      "spec/fixtures/test-register/reg-1/item-class-1",
       "00000000-0000-0000-0000-000000000001",
+      "spec/fixtures/test-register/reg-1/item-class-1",
     )
   end
 

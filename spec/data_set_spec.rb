@@ -3,8 +3,7 @@
 RSpec.describe Paneron::Register::DataSet do
   let(:raw_data_set) do
     Paneron::Register::Raw::DataSet.new(
-      "spec/fixtures/test-register",
-      "reg-1",
+      "spec/fixtures/test-register/reg-1",
     )
   end
 

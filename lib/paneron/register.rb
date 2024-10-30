@@ -3,6 +3,11 @@
 require "paneron/register/version"
 require "paneron/register/error"
 
+require "paneron/register/writeable"
+require "paneron/register/validatable"
+require "paneron/register/hierarchical"
+require "paneron/register/root_finder"
+
 require "paneron/register/raw/item"
 require "paneron/register/raw/item_class"
 require "paneron/register/raw/data_set"

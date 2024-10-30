@@ -3,8 +3,8 @@
 RSpec.describe Paneron::Register::Item do
   let(:raw_item) do
     Paneron::Register::Raw::Item.new(
-      "spec/fixtures/test-register/reg-1/item-class-1",
       "00000000-0000-0000-0000-000000000001",
+      "spec/fixtures/test-register/reg-1/item-class-1",
     )
   end
 
