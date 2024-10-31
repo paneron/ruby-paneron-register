@@ -7,6 +7,78 @@ RSpec.describe Paneron::Register::Raw::Register do
     )
   end
 
+  describe "#sync" do
+    # before do
+    #   allow(raw_register).to receive(:pull_from_remote)
+    # end
+
+    describe "with a local-only register" do
+      before do
+        allow(raw_register).to receive(:remote?).and_return(false)
+      end
+
+      it "raises an error" do
+        expect do
+          raw_register.sync
+        end.to raise_error(
+          Paneron::Register::Error,
+          "Cannot sync without a remote",
+        )
+      end
+    end
+
+    describe "with a remote register" do
+      before do
+        allow(raw_register).to receive(:remote?).and_return(true)
+        allow(raw_register).to receive(:pull_from_remote)
+        allow(raw_register).to receive(:add_changes_to_staging)
+        allow(raw_register).to receive(:commit_changes)
+        allow(raw_register).to receive(:has_unsynced_changes?)
+        allow(raw_register).to receive(:push_commits_to_remote)
+      end
+
+      describe "with update: true" do
+        it "calls pull_from_remote" do
+          expect(raw_register).to receive(:pull_from_remote)
+          raw_register.sync(update: true)
+        end
+
+        it "calls add_changes_to_staging" do
+          expect(raw_register).to receive(:add_changes_to_staging)
+          raw_register.sync(update: true)
+        end
+
+        describe "when has_unsynced_changes?" do
+          before do
+            allow(raw_register).to receive(:has_unsynced_changes?).and_return(true)
+          end
+
+          it "calls commit_changes" do
+            expect(raw_register).to receive(:commit_changes)
+            raw_register.sync(update: true)
+          end
+
+          it "calls push_commits_to_remote" do
+            expect(raw_register).to receive(:push_commits_to_remote)
+            raw_register.sync(update: true)
+          end
+        end
+      end
+
+      describe "with update: false" do
+        it "does not call pull_from_remote" do
+          expect(raw_register).to_not receive(:pull_from_remote)
+          raw_register.sync(update: false)
+        end
+
+        it "calls add_changes_to_staging" do
+          expect(raw_register).to receive(:add_changes_to_staging)
+          raw_register.sync(update: false)
+        end
+      end
+    end
+  end
+
   describe "#save" do
     let(:old_register_path) do
       "spec/fixtures/test-register"
