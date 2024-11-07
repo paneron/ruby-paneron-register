@@ -3,6 +3,7 @@
 module Paneron
   module Register
     module Writeable
+      # @return [Paneron::Register::Raw::Register] self
       def save
         unless parent.nil? || parent.path_valid?
           raise Paneron::Register::Error, "Parent (#{parent.class.name}) is not valid"
@@ -21,6 +22,8 @@ module Paneron
             "  - #{e}"
           end.join("\n")}"
         end
+
+        self
       end
 
       def remote?
@@ -51,6 +54,8 @@ module Paneron
 
       # Sync to remote
       # @param [Boolean] update If true, rebase and pull before pushing
+      # @param [String] message Commit message
+      # @return [Paneron::Register::Raw::Register] self
       def sync(update: false, message: nil)
         if remote?
           if update
@@ -65,6 +70,8 @@ module Paneron
           raise Paneron::Register::Error, "Cannot sync without a remote"
         end
       end
+
+      self
     end
   end
 end

@@ -23,7 +23,6 @@ module Paneron
 
           @register_path = register_path
           @old_path = @register_path
-          @data_set_names = nil
           @data_sets = {}
           @metadata = nil
         end
@@ -68,6 +67,14 @@ module Paneron
           # end
         end
 
+        def title=(new_title)
+          metadata["title"] = new_title.to_s
+        end
+
+        def title
+          metadata["title"]
+        end
+
         def self_path
           register_path
         end
@@ -81,21 +88,21 @@ module Paneron
           new_data_sets.each do |data_set|
             data_set.set_register(self)
             @data_sets[data_set.data_set_name] = data_set
-            data_set_names << data_set.data_set_name
-            metadata.merge!("data_sets" => { data_set.data_set_name => true })
+            metadata["datasets"].merge!(
+              { data_set.data_set_name => true },
+            )
           end
         end
 
         def spawn_data_set(data_set_name, metadata: {})
-          new_data_set =
-            @data_sets[data_set_name] =
-              Paneron::Register::Raw::DataSet.new(
-                File.join(register_path, data_set_name),
-                register: self,
-              )
+          new_data_set = Paneron::Register::Raw::DataSet.new(
+            File.join(register_path, data_set_name),
+            register: self,
+          )
 
-          data_set_names << data_set_name
           new_data_set.metadata = metadata
+          add_data_sets(new_data_set)
+
           new_data_set
         end
 
@@ -126,6 +133,11 @@ module Paneron
           require "base64"
           digest = [Digest::SHA1.hexdigest(repo_url)].pack("H*")
           Base64.encode64(digest).tr("+/= ", "_-")[0..16]
+        end
+
+        # Basically .new but calls #save at the end
+        def self.generate(register_path, git_url: nil)
+          new(register_path, git_url: git_url).save
         end
 
         def self.from_git(repo_url, update: true)
@@ -199,15 +211,20 @@ module Paneron
         end
 
         def data_set_names
-          @data_set_names ||= Dir.glob(
-            File.join(
-              register_path,
-              "*#{Paneron::Register::Raw::DataSet::DATA_SET_METADATA_FILENAME}",
-            ),
-          )
-            .map do |file|
+          if @data_sets.empty?
+            Dir.glob(
+              File.join(
+                register_path,
+                "*#{Paneron::Register::Raw::DataSet::DATA_SET_METADATA_FILENAME}",
+              ),
+            )
+              .map do |file|
               File.basename(File.dirname(file))
             end.to_set
+          else
+            @data_sets.keys
+          end
+          # @data_set_names ||= Dir.glob(
         end
 
         def data_set_path(data_set_name)
@@ -227,10 +244,14 @@ module Paneron
 
         def data_sets(data_set_name = nil)
           if data_set_name.nil?
-            data_set_names.reduce({}) do |acc, data_set_name|
-              acc[data_set_name] = data_sets(data_set_name)
-              acc
-            end
+            @data_sets = if !@data_sets.empty?
+                           @data_sets
+                         else
+                           data_set_names.reduce({}) do |acc, data_set_name|
+                             acc[data_set_name] = data_sets(data_set_name)
+                             acc
+                           end
+                         end
           else
             @data_sets[data_set_name] ||=
               Paneron::Register::Raw::DataSet.new(

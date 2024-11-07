@@ -1,6 +1,34 @@
 # frozen_string_literal: true
 
 RSpec.describe Paneron::Register::Raw::Register do
+  describe ".generate" do
+    let(:register_path) do
+      "spec/fixtures/test-new-register"
+    end
+
+    let(:git_url) do
+      "https://github.com/paneron/test-register.git"
+    end
+
+    it "generates a new register" do
+      expect do
+        described_class.generate(
+          register_path,
+          git_url: git_url,
+        )
+      end.to change { File.directory?(register_path) }.from(false).to(true)
+    end
+
+    it "returns a Raw::Register object" do
+      expect(
+        described_class.generate(
+          register_path,
+          git_url: git_url,
+        ),
+      ).to be_a(Paneron::Register::Raw::Register)
+    end
+  end
+
   let(:raw_register) do
     described_class.new(
       "spec/fixtures/test-register",
@@ -88,6 +116,10 @@ RSpec.describe Paneron::Register::Raw::Register do
       "spec/fixtures/test-register2"
     end
 
+    it "returns a Raw::Register object" do
+      expect(raw_register.save).to be_a(Paneron::Register::Raw::Register)
+    end
+
     it "saves to a new path" do
       expect do
         raw_register.register_path = new_register_path
@@ -108,31 +140,62 @@ RSpec.describe Paneron::Register::Raw::Register do
                ].map { |path| File.directory?(path) }
              }.from([true, false]).to([false, true])
     end
-
-    it "creates new DataSet objects" do
-      expect do
-        raw_register.spawn_data_set("ds-a")
-        raw_register.spawn_data_set("ds-b")
-        raw_register.spawn_data_set("ds-c")
-      end.to change { raw_register.data_sets.length }.by(3)
-    end
   end
 
   describe "#spawn_data_set" do
-    it "creates a new DataSet object" do
-      expect do
-        raw_register.spawn_data_set("ds-a")
-        raw_register.spawn_data_set("ds-a")
-        raw_register.spawn_data_set("ds-a")
-      end.to change { raw_register.data_sets.length }.by(1)
+    let(:raw_register) do
+      described_class.new(
+        "spec/fixtures/new-register",
+      ).save
     end
 
-    it "creates new DataSet objects" do
-      expect do
-        raw_register.spawn_data_set("ds-a")
-        raw_register.spawn_data_set("ds-b")
-        raw_register.spawn_data_set("ds-c")
-      end.to change { raw_register.data_sets.length }.by(3)
+    describe "when adding the same data set multiple times" do
+      let(:new_data_set_name) do
+        "ds-a"
+      end
+      let(:action) do
+        proc {
+          3.times do
+            raw_register.spawn_data_set(new_data_set_name)
+          end
+        }
+      end
+
+      it "creates a new DataSet object" do
+        expect(&action).to change { raw_register.data_sets.length }.by(1)
+      end
+
+      it "creates a new DataSet object and modifies metadata" do
+        expect(&action).to change { raw_register.metadata["datasets"].keys.length }.by(1)
+
+        expect(raw_register.metadata["datasets"][new_data_set_name]).to be_truthy
+      end
+    end
+
+    describe "when adding different data sets" do
+      let(:new_data_set_names) do
+        ["ds-a", "ds-b", "ds-c"]
+      end
+
+      let(:action) do
+        proc {
+          new_data_set_names.each { |ds| raw_register.spawn_data_set(ds) }
+        }
+      end
+
+      it "creates new DataSet objects" do
+        expect(&action).to change { raw_register.data_sets.length }.by(3)
+      end
+
+      it "creates new DataSet objects and modifies metadata datasets count" do
+        expect(&action).to change { raw_register.metadata["datasets"].keys.length }.by(3)
+      end
+
+      it "creates new DataSet objects and modifies metadata datasets values" do
+        expect(&action).to change {
+          new_data_set_names.map { |ds| raw_register.metadata["datasets"][ds] }
+        }.from([nil, nil, nil]).to([true, true, true])
+      end
     end
   end
 
@@ -228,7 +291,6 @@ RSpec.describe Paneron::Register::Raw::Register do
     describe "#data_set_names" do
       subject(:data_set_names) { register.data_set_names }
 
-      it { is_expected.to be_instance_of(Set) }
       its(:length) { is_expected.to eql(3) }
       it {
         is_expected.to contain_exactly(
@@ -245,6 +307,22 @@ RSpec.describe Paneron::Register::Raw::Register do
           Paneron::Register::Register,
         )
       end
+    end
+  end
+
+  describe "#title=" do
+    it "updates the metadata title" do
+      expect do
+        raw_register.title = "new title"
+      end.to change { raw_register.metadata["title"] }.from("register").to("new title")
+
+      expect do
+        raw_register.title = "new title"
+      end.to_not(change { raw_register.metadata["title"] })
+
+      expect do
+        raw_register.title = "new title 2"
+      end.to change { raw_register.title }.from("new title").to("new title 2")
     end
   end
 end
