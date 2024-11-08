@@ -7,6 +7,39 @@ RSpec.describe Paneron::Register::Raw::DataSet do
     )
   end
 
+  describe "#data_set_name=" do
+    let(:old_data_set_name) do
+      "ds-a"
+    end
+
+    let(:new_data_set_name) do
+      "ds-b"
+    end
+
+    let(:raw_data_set) do
+      ds = raw_register.spawn_data_set(old_data_set_name)
+      expect(ds.data_set_name).to eql(old_data_set_name)
+      expect(ds.title).to eql(old_data_set_name)
+      ds
+    end
+
+    it "changes data_set_name" do
+      expect do
+        raw_data_set.data_set_name = new_data_set_name
+      end.to change {
+               raw_data_set.data_set_name
+             }.from(old_data_set_name).to(new_data_set_name)
+    end
+
+    it "changes panerondataset title" do
+      expect do
+        raw_data_set.data_set_name = new_data_set_name
+      end.to change {
+               raw_data_set.title
+             }.from(old_data_set_name).to(new_data_set_name)
+    end
+  end
+
   describe "#save" do
     let(:old_data_set_name) do
       "ds-a"

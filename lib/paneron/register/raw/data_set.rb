@@ -21,7 +21,7 @@ module Paneron
         )
 
           unless data_set_path.nil?
-            register_path, data_set_name = Hierarchical.split_path(data_set_path)
+            register_path, new_data_set_name = Hierarchical.split_path(data_set_path)
           end
 
           # Deduce parent from self path,
@@ -41,14 +41,16 @@ module Paneron
                   "#{@register.register_path} != #{register_path}"
           end
 
-          @data_set_name = data_set_name
-          @old_name = @data_set_name
           @extension = extension
           @item_classes = {}
-          @item_class_names = nil
           @item_uuids = nil
           @metadata = nil
           @paneron_metadata = nil
+          self.data_set_name = new_data_set_name
+          @old_name = @data_set_name
+          # {
+          #   "title" => data_set_name,
+          # }
         end
 
         DATA_SET_METADATA_FILENAME = "/register.yaml"
@@ -68,6 +70,7 @@ module Paneron
           end
 
           @data_set_name = new_data_set_name
+          self.title = new_data_set_name
         end
 
         def data_set_yaml_path
@@ -111,7 +114,8 @@ module Paneron
 
           # TODO: populate template with sensible defaults
           if @paneron_metadata.nil? || @paneron_metadata.empty?
-            File.write(paneron_yaml_path, self.class.paneron_metadata_template.to_yaml)
+            File.write(paneron_yaml_path,
+                       self.class.paneron_metadata_template(data_set_name).to_yaml)
           else
             File.write(paneron_yaml_path, paneron_metadata.to_yaml)
           end
@@ -146,12 +150,11 @@ module Paneron
           @register.register_path
         end
 
-        def add_item_classes(new_item_classes)
+        def add_item_classes(*new_item_classes)
           new_item_classes = [new_item_classes] unless new_item_classes.is_a?(Enumerable)
           new_item_classes.each do |item_class|
             item_class.set_data_set(self)
             @item_classes[item_class.item_class_name] = item_class
-            item_class_names << item_class.item_class_name
           end
         end
 
@@ -194,10 +197,14 @@ module Paneron
 
         def item_classes(item_class_name = nil)
           if item_class_name.nil?
-            item_class_names.reduce({}) do |acc, item_class_name|
-              acc[item_class_name] = item_classes(item_class_name)
-              acc
-            end
+            @item_classes = if !@item_classes.empty?
+                              @item_classes
+                            else
+                              item_class_names.reduce({}) do |acc, item_class_name|
+                                acc[item_class_name] = item_classes(item_class_name)
+                                acc
+                              end
+                            end
           else
             @item_classes[item_class_name] ||=
               Paneron::Register::Raw::ItemClass.new(
@@ -208,21 +215,23 @@ module Paneron
         end
 
         def spawn_item_class(item_class_name, metadata: {})
-          new_item_class =
-            @item_classes[item_class_name] =
-              Paneron::Register::Raw::ItemClass.new(
-                File.join(data_set_path, item_class_name),
-                data_set: self,
-              )
+          new_item_class = Paneron::Register::Raw::ItemClass.new(
+            File.join(data_set_path, item_class_name),
+            data_set: self,
+          )
 
-          item_class_names << item_class_name
+          add_item_classes(new_item_class)
+
           new_item_class
         end
 
         def item_class_names
-          @item_class_names ||=
+          if @item_classes.empty?
             Dir.glob(File.join(data_set_path, "*/*.#{extension}"))
               .map { |file| File.basename(File.dirname(file)) }.to_set
+          else
+            @item_classes.keys
+          end
         end
 
         def item_uuids
@@ -242,10 +251,18 @@ module Paneron
         #     id: 'npm-paneron-extension-name'
         #     version: 0.0.1-alpha1
         def paneron_metadata
-          @paneron_metadata ||= YAML.safe_load_file(
-            paneron_yaml_path,
-            permitted_classes: [Time, Date, DateTime],
-          )
+          @paneron_metadata ||= begin
+            YAML.safe_load_file(
+              paneron_yaml_path,
+              permitted_classes: [Time, Date, DateTime],
+            )
+          rescue Errno::ENOENT
+            {}
+          end
+        end
+
+        def merge_paneron_metadata(other)
+          paneron_metadata.merge!(other)
         end
 
         def paneron_metadata=(new_paneron_metadata)
@@ -253,34 +270,104 @@ module Paneron
         end
 
         def metadata
-          @metadata ||= YAML.safe_load_file(
-            data_set_yaml_path,
-            permitted_classes: [Time, Date, DateTime],
-          )
+          @metadata ||= begin
+            YAML.safe_load_file(
+              data_set_yaml_path,
+              permitted_classes: [Time, Date, DateTime],
+            )
+          rescue Errno::ENOENT
+            {}
+          end
+        end
+
+        def merge_metadata(other)
+          metadata.merge!(other)
         end
 
         def metadata=(metadata)
           @metadata = metadata
         end
 
-        def self.metadata_template
-          {
-            "name" => "",
-            "stakeholders" => [{
-              "roles" => [],
-              "name" => "",
-              "gitServerUsername" => "",
-              "affiliations" => [],
-              "contacts" => [],
-            }],
-            "version" => { "id" => "", "timestamp" => "" },
-            "contentSummary" => "",
-            "operatingLanguage" => { "name" => "", "country" => "", "language" => "" },
-            "organizations" => { "uuid" => { "name" => "", "logoURL" => "" } },
+        def name=(new_name)
+          metadata["name"] = new_name.to_s
+        end
+
+        # This is really just data_set_name
+        def title=(new_title)
+          paneron_metadata["title"] = new_title.to_s
+        end
+        private :title=
+
+        def title
+          paneron_metadata["title"]
+        end
+
+        def stakeholders
+          metadata["stakeholders"] || []
+        end
+
+        def stakeholders=(new_stakeholders)
+          metadata["stakeholders"] ||= new_stakeholders
+        end
+
+        def content_summary
+          metadata["contentSummary"] || ""
+        end
+
+        def content_summary=(new_content_summary)
+          metadata["contentSummary"] = new_content_summary.to_s
+        end
+
+        def operating_language
+          metadata["operatingLanguage"] || {}
+        end
+
+        def operating_language=(name: "", country: "", language: "")
+          metadata["operatingLanguage"] = {
+            "name" => name.to_s,
+            "country" => country.to_s,
+            "language" => language.to_s,
           }
         end
 
-        def self.paneron_metadata_template
+        def organizations
+          metadata["organizations"] || {}
+        end
+
+        def organizations=(new_organizations)
+          metadata["organizations"] = case new_organizations
+                                      when Hash then new_organizations
+                                      else
+                                        raise Paneron::Register::Error, "organizations must be a hash"
+                                      end
+        end
+
+        def self.metadata_template
+          {
+            "name" => "",
+            "stakeholders" => [
+              # {
+              #   "roles" => [],
+              #   "name" => "",
+              #   "gitServerUsername" => "",
+              #   "affiliations" => [],
+              #   "contacts" => [],
+              # },
+            ],
+            "version" => nil, # { "id" => "", "timestamp" => "" },
+            "contentSummary" => "",
+            "operatingLanguage" => {
+              "name" => "English",
+              "country" => "N/A",
+              "language" => "eng",
+            },
+            "organizations" => {
+              # "uuid" => { "name" => "", "logoURL" => "" },
+            },
+          }
+        end
+
+        def self.paneron_metadata_template(title: "")
           {
             "title" => "",
             "type" => {

@@ -96,13 +96,18 @@ module Paneron
           end
         end
 
-        def spawn_data_set(data_set_name, metadata: {})
+        def spawn_data_set(
+          data_set_name,
+          metadata: {},
+          paneron_metadata: {}
+        )
           new_data_set = Paneron::Register::Raw::DataSet.new(
             File.join(register_path, data_set_name),
             register: self,
           )
 
-          new_data_set.metadata = metadata
+          new_data_set.merge_metadata(metadata)
+          new_data_set.merge_paneron_metadata(paneron_metadata)
           add_data_sets(new_data_set)
 
           new_data_set
