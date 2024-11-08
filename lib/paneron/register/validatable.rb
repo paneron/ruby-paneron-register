@@ -3,6 +3,11 @@
 module Paneron
   module Register
     module Validatable
+      # def self.included(base)
+      #   base.class_eval do
+      #   end
+      # end
+
       def path_valid?
         self.class.validate_path(self_path)
         true

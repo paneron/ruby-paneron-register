@@ -3,6 +3,11 @@
 module Paneron
   module Register
     module RootFinder
+      # def self.included(base)
+      #   base.class_eval do
+      #   end
+      # end
+
       def register
         parent.register
       end

@@ -3,6 +3,11 @@
 module Paneron
   module Register
     module Writeable
+      # def self.included(base)
+      #   base.class_eval do
+      #   end
+      # end
+
       # @return [Paneron::Register::Raw::Register] self
       def save
         unless parent.nil? || parent.path_valid?

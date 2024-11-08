@@ -79,6 +79,8 @@ module Paneron
           register_path
         end
 
+        # TODO: Expand validation to include data set metadata?
+        # TODO: What is considered valid?
         def is_valid?
           true
         end

@@ -3,7 +3,12 @@
 module Paneron
   module Register
     module Hierarchical
+      # def self.included(base)
+      #   base.class_eval do
+      #   end
+      # end
       # Split into parent path and base name
+
       def self.split_path(full_path)
         # {
         #   parent_path: File.dirname(full_path),
