@@ -123,20 +123,45 @@ RSpec.describe Paneron::Register::Raw::DataSet do
       ds
     end
 
-    it "creates a new ItemClass object" do
-      expect do
-        raw_data_set.spawn_item_class("ic-a")
-        raw_data_set.spawn_item_class("ic-a")
-        raw_data_set.spawn_item_class("ic-a")
-      end.to change { raw_data_set.item_classes.length }.by(1)
+    describe "when adding the item class multiple times" do
+      let(:new_item_class_name) do
+        "ic-a"
+      end
+      let(:action) do
+        proc {
+          3.times do
+            raw_data_set.spawn_item_class(new_item_class_name)
+          end
+        }
+      end
+
+      it "creates a new ItemClass object" do
+        expect(&action).to change { raw_data_set.item_classes.length }.by(1)
+      end
+
+      it "creates a new ItemClass object and modifies #item_class_names" do
+        expect(&action).to change { raw_data_set.item_class_names.length }.by(1)
+      end
     end
 
-    it "creates new ItemClass objects" do
-      expect do
-        raw_data_set.spawn_item_class("ic-a")
-        raw_data_set.spawn_item_class("ic-b")
-        raw_data_set.spawn_item_class("ic-c")
-      end.to change { raw_data_set.item_classes.length }.by(3)
+    describe "when adding different item classes" do
+      let(:new_item_class_names) do
+        ["ic-a", "ic-b", "ic-c"]
+      end
+
+      let(:action) do
+        proc {
+          new_item_class_names.each { |ic| raw_data_set.spawn_item_class(ic) }
+        }
+      end
+
+      it "creates new ItemClass objects" do
+        expect(&action).to change { raw_data_set.item_classes.length }.by(3)
+      end
+
+      it "creates a new ItemClass object and modifies #item_class_names" do
+        expect(&action).to change { raw_data_set.item_class_names.length }.by(3)
+      end
     end
   end
 

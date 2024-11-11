@@ -43,7 +43,6 @@ module Paneron
 
           @extension = extension
           @item_classes = {}
-          @item_uuids = nil
           @metadata = nil
           @paneron_metadata = nil
           self.data_set_name = new_data_set_name
@@ -235,7 +234,7 @@ module Paneron
         end
 
         def item_uuids
-          item_classes.values.map(&:item_uuids).flatten
+          item_classes.values.map(&:item_uuids).to_set.flatten
         end
 
         # TODO: Add validation to register.yaml fields

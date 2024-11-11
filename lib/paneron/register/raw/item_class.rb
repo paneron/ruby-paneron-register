@@ -102,8 +102,7 @@ module Paneron
           new_items = [new_items] unless new_items.is_a?(Enumerable)
           new_items.each do |item|
             item.set_item_class(self)
-            @items[item.id] = item
-            item_uuids << item.id
+            @items[item.uuid] = item
           end
         end
 
@@ -129,21 +128,32 @@ module Paneron
           )
         end
 
-        def spawn_item(item_uuid)
-          new_item =
-            @items[item_uuid] =
-              Paneron::Register::Raw::Item.new(
-                item_uuid,
-                item_class: self,
-              )
+        def add_item(*new_items)
+          new_items = [new_items] unless new_items.is_a?(Enumerable)
+          new_items.each do |item|
+            item.set_item_class(self)
+            @items[item.item_uuid] = item
+          end
+        end
 
-          item_uuids << item_uuid
+        def spawn_item(item_uuid)
+          new_item = Paneron::Register::Raw::Item.new(
+            item_uuid,
+            item_class: self,
+          )
+
+          add_item(new_item)
+
           new_item
         end
 
         def item_uuids
-          @item_uuids ||= Dir.glob(File.join(item_class_path, "*.#{extension}"))
-            .map { |file| File.basename(file, ".#{extension}") }
+          if @items.empty?
+            Dir.glob(File.join(item_class_path, "*.#{extension}"))
+              .map { |file| File.basename(file, ".#{extension}") }.to_set
+          else
+            @items.keys
+          end
         end
 
         def items(uuid = nil)

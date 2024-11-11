@@ -10,12 +10,12 @@ module Paneron
         include Validatable
         include RootFinder
 
-        attr_reader :item_id,
+        attr_reader :item_uuid,
                     :extension
         attr_accessor :item_class
 
         def initialize(
-          item_id,
+          item_uuid,
           item_class_path = nil,
           extension = "yaml",
           item_class: nil
@@ -30,7 +30,7 @@ module Paneron
                           item_class
                         end
 
-          @item_id = item_id
+          @item_uuid = item_uuid
           @extension = extension
           @to_h = nil
           @status = nil
@@ -39,7 +39,7 @@ module Paneron
         end
 
         def item_path
-          File.join(item_class_path, "#{item_id}.#{extension}")
+          File.join(item_class_path, "#{item_uuid}.#{extension}")
         end
 
         def item_class_path
@@ -56,8 +56,8 @@ module Paneron
           self.date_accepted = date_accepted
         end
 
-        def id
-          @item_id
+        def uuid
+          @item_uuid
         end
 
         def status
@@ -137,7 +137,7 @@ module Paneron
 
         def to_lutaml
           Paneron::Register::Item.new(
-            id: item_id,
+            id: item_uuid,
             data: data,
             status: Paneron::Register::ItemStatus.new(state: status),
             date_accepted: date_accepted.to_s,
@@ -146,7 +146,7 @@ module Paneron
 
         def to_h
           {
-            "id" => item_id,
+            "id" => item_uuid,
             "data" => data,
             "status" => status,
             "dateAccepted" => date_accepted,

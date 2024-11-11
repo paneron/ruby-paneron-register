@@ -1,6 +1,12 @@
 # frozen_string_literal: true
 
 RSpec.describe Paneron::Register::Raw::ItemClass do
+  let(:raw_data_set) do
+    Paneron::Register::Raw::Register.new(
+      "spec/fixtures/test-register",
+    ).spawn_data_set("test-reg-a")
+  end
+
   describe "#path_valid?" do
     describe "with an invalid path" do
       subject do
@@ -110,6 +116,50 @@ RSpec.describe Paneron::Register::Raw::ItemClass do
   end
 
   describe "#spawn_item" do
+    let(:raw_item_class) do
+      raw_data_set.spawn_item_class("asdfnonexist")
+    end
+
+    describe "when adding the item class multiple times" do
+      let(:new_item_uuid) do
+        "000a-1"
+      end
+      let(:action) do
+        proc {
+          3.times do
+            raw_item_class.spawn_item(new_item_uuid)
+          end
+        }
+      end
+
+      it "creates a new Item object" do
+        expect(&action).to change { raw_item_class.items.length }.by(1)
+      end
+
+      it "creates a new Item object and modifies #item_uuids" do
+        expect(&action).to change { raw_item_class.item_uuids.length }.by(1)
+      end
+    end
+
+    describe "when adding different item classes" do
+      let(:new_item_uuids) do
+        ["ic-a", "ic-b", "ic-c"]
+      end
+
+      let(:action) do
+        proc {
+          new_item_uuids.each { |ic| raw_item_class.spawn_item(ic) }
+        }
+      end
+
+      it "creates new Item objects" do
+        expect(&action).to change { raw_item_class.items.length }.by(3)
+      end
+
+      it "creates a new Item object and modifies #item_uuids" do
+        expect(&action).to change { raw_item_class.item_uuids.length }.by(3)
+      end
+    end
     it "creates a new Item object" do
       expect do
         item_class.spawn_item("000a")
