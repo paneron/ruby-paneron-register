@@ -36,7 +36,7 @@ RSpec.describe Paneron::Register::Raw::Register do
           register_path,
           git_url: git_url,
         ),
-      ).to be_a(Paneron::Register::Raw::Register)
+      ).to be_a(described_class)
     end
   end
 
@@ -327,6 +327,28 @@ RSpec.describe Paneron::Register::Raw::Register do
           "spec/fixtures/test-register",
         )
       end.not_to raise_error
+    end
+
+    describe "with defaults" do
+      subject do
+        described_class.generate("new/test/register")
+      end
+
+      its(:git_branch) { is_expected.to eql "main" }
+      its(:git_remote_name) { is_expected.to eql "origin" }
+    end
+
+    describe "with non-defaults" do
+      subject do
+        described_class.generate(
+          "new/test/register",
+          git_branch: "staging",
+          git_remote_name: "self",
+        )
+      end
+
+      its(:git_branch) { is_expected.to eql "staging" }
+      its(:git_remote_name) { is_expected.to eql "self" }
     end
   end
 

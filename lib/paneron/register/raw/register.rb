@@ -10,7 +10,7 @@ module Paneron
         include Writeable
         include Validatable
 
-        attr_reader :git_client, :git_url
+        attr_reader :git_client, :git_url, :git_branch, :git_remote_name
         attr_accessor :register_path
 
         def initialize(
@@ -309,8 +309,18 @@ module Paneron
         end
 
         # Basically .new but calls #save at the end
-        def self.generate(register_path, git_url: nil)
-          new(register_path, git_url: git_url).save
+        def self.generate(
+          register_path,
+          git_url: nil,
+          git_branch: nil,
+          git_remote_name: nil
+        )
+          new(
+            register_path,
+            git_url: git_url,
+            git_branch: git_branch,
+            git_remote_name: git_remote_name,
+          ).save
         end
 
         def self.calculate_repo_cache_name(repo_url)
