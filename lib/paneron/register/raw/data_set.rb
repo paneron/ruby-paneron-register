@@ -43,6 +43,7 @@ module Paneron
 
           @extension = extension
           @item_classes = {}
+          @items = {}
           @metadata = nil
           @paneron_metadata = nil
           self.data_set_name = new_data_set_name
@@ -235,6 +236,28 @@ module Paneron
 
         def item_uuids
           item_classes.values.map(&:item_uuids).to_set.flatten
+        end
+
+        def items(uuid = nil, item_class_name = nil)
+          if uuid.nil?
+            @items = if !@items.empty?
+                       @items
+                     else
+                       item_classes.reduce({}) do |acc, (item_klass_name, item_klass)|
+                         item_klass.item_uuids.each do |item_uuid|
+                           acc[item_uuid] = items(item_uuid, item_klass_name)
+                         end
+                         acc
+                       end
+                     end
+          else
+            @items[uuid] ||=
+              Paneron::Register::Raw::Item.new(
+                uuid,
+                File.join(data_set_path, item_class_name),
+                item_class: item_classes[item_class_name],
+              )
+          end
         end
 
         # TODO: Add validation to register.yaml fields

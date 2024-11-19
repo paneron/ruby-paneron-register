@@ -219,16 +219,32 @@ RSpec.describe Paneron::Register::Raw::DataSet do
         end
       end
     end
+
+    it "retrieves a specific item class" do
+      expect(data_set.item_classes("item-class-1")).to be_instance_of(
+        Paneron::Register::Raw::ItemClass,
+      )
+    end
   end
 
-  it "lists out item UUIDs" do
-    expect(data_set.item_uuids.length).to be(9)
+  describe "#item_uuids" do
+    it "lists out item UUIDs" do
+      expect(data_set.item_uuids.length).to be(9)
+    end
   end
 
-  it "retrieves a specific item class" do
-    expect(data_set.item_classes("item-class-1")).to be_instance_of(
-      Paneron::Register::Raw::ItemClass,
-    )
+  describe "#items(uuid)" do
+    describe "given no arguments" do
+      it "enumerates all items" do
+        expect(data_set.items.length).to be 9
+      end
+
+      it "returns a list of Raw::Item" do
+        data_set.items.each_pair do |_item_uuid, item|
+          expect(item).to be_instance_of(Paneron::Register::Raw::Item)
+        end
+      end
+    end
   end
 
   describe "#metadata" do
