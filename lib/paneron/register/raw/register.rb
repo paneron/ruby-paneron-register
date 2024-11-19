@@ -16,13 +16,17 @@ module Paneron
         def initialize(
           register_path,
           git_url: nil,
-          update_git: nil
+          update_git: nil,
+          git_remote_name: nil,
+          git_branch: nil
         )
           @old_git_url = @git_url = git_url
           @register_path = register_path
           setup_git(
             git_url: git_url,
             path: register_path,
+            git_remote_name: git_remote_name,
+            git_branch: git_branch,
             update: update_git,
           )
 
@@ -33,9 +37,27 @@ module Paneron
         end
 
         # Defer all mkdir until #save_sequence
-        def setup_git(git_url: nil, path: nil, update: nil)
+        def setup_git(
+          git_url: nil,
+          path: nil,
+          git_remote_name: nil,
+          git_branch: nil,
+          update: nil
+        )
           require "git"
           self.class.setup_cache_path
+
+          @git_remote_name = if git_remote_name.nil? || git_remote_name.empty?
+                               "origin"
+                             else
+                               git_remote_name
+                             end
+
+          @git_branch = if git_branch.nil? || git_branch.empty?
+                          "main"
+                        else
+                          git_branch
+                        end
 
           if git_url.nil? && path.nil?
             raise Paneron::Register::Error,
@@ -76,7 +98,8 @@ module Paneron
               rescue ArgumentError => e
                 if /not in a git working tree/.match?(e.message)
                   @git_save_fn = proc {
-                    @git_client = self.class.init_git_repo(repo_path)
+                    @git_client = self.class.init_git_repo(repo_path,
+                                                           initial_branch: @git_branch)
                     log_change_git_remote(nil)
                     change_git_remote(nil)
                   }
@@ -88,7 +111,7 @@ module Paneron
               # No remote, and local repo path does not exist.
               git_init_fn = proc {
                 FileUtils.mkdir_p(repo_path)
-                @git_client = self.class.init_git_repo(repo_path)
+                @git_client = self.class.init_git_repo(repo_path, initial_branch: @git_branch)
                 log_change_git_remote(nil)
                 change_git_remote(nil)
               }
@@ -101,26 +124,42 @@ module Paneron
           elsif File.exists?(repo_path)
             # Has remote, as well as local repo path.
             @git_save_fn = nil
-            @git_client = self.class.open_git_repo(repo_path)
 
-            # Check if remote matches the provided git_url
-            if !@git_client.remote("origin").url.nil? && @git_client.remote("origin").url != git_url
+            git_fn = proc {
+              # Check if remote matches the provided git_url
+              if !@git_client.remote(@git_remote_name).url.nil? && @git_client.remote(@git_remote_name).url != git_url
 
-              raise Paneron::Register::Error,
-                    "Git remote @ #{clone_path} already exists " \
-                    "(#{@git_client.remote('origin').url}) " \
-                    "but does not match provided URL (#{git_url}).\n" \
-                    "Instead, use `r = #{self}.new(\"#{path}\")` and "\
-                    "`r.git_url = \"#{git_url}\"` to change its Git URL."
-            end
-            log_change_git_remote(git_url)
-            change_git_remote(git_url)
+                raise Paneron::Register::Error,
+                      "Git remote @ #{clone_path} already exists " \
+                      "(#{@git_client.remote(@git_remote_name).url}) " \
+                      "but does not match provided URL (#{git_url}).\n" \
+                      "Instead, use `r = #{self}.new(\"#{path}\")` and "\
+                      "`r.git_url = \"#{git_url}\"` to change its Git URL."
+              end
+              log_change_git_remote(git_url)
+              change_git_remote(git_url)
 
-            # Pull-rebase to update it
-            if update
-              @git_client.pull(
-                nil, nil, rebase: true
-              )
+              # Pull-rebase to update it
+              if update
+                @git_client.pull(
+                  nil, nil, rebase: true
+                )
+              end
+            }
+
+            begin
+              @git_client = self.class.open_git_repo(repo_path)
+              git_fn.call
+            rescue ArgumentError => e
+              if /not in a git working tree/.match?(e.message)
+                @git_save_fn = proc {
+                  @git_client = self.class.init_git_repo(repo_path,
+                                                         initial_branch: @git_branch)
+                  git_fn.call
+                }
+              else
+                raise e
+              end
             end
 
           else
@@ -395,10 +434,10 @@ module Paneron
         end
 
         def change_git_remote(new_url, git_client: @git_client)
-          if !git_client.remote("origin").url.nil?
-            git_client.remote("origin").remove
+          if !git_client.remote(@git_remote_name).url.nil?
+            git_client.remove_remote(@git_remote_name)
             if !new_url.nil?
-              git_client.add_remote("origin", new_url)
+              git_client.add_remote(@git_remote_name)
             end
           end
         end
@@ -423,8 +462,8 @@ module Paneron
             Git.open(repo_path)
           end
 
-          def init_git_repo(repo_path)
-            Git.init(repo_path)
+          def init_git_repo(repo_path, initial_branch: nil)
+            Git.init(repo_path, initial_branch: initial_branch)
           end
         end
       end

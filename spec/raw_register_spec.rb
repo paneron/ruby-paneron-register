@@ -136,6 +136,7 @@ RSpec.describe Paneron::Register::Raw::Register do
         allow(raw_register).to receive(:add_changes_to_staging)
         allow(raw_register).to receive(:commit_changes)
         allow(raw_register).to receive(:has_unsynced_changes?)
+        allow(raw_register).to receive(:has_uncommited_changes?)
         allow(raw_register).to receive(:push_commits_to_remote)
       end
 
@@ -150,14 +151,20 @@ RSpec.describe Paneron::Register::Raw::Register do
           raw_register.sync(update: true)
         end
 
-        describe "when has_unsynced_changes?" do
+        describe "when has_uncommited_changes?" do
           before do
-            allow(raw_register).to receive(:has_unsynced_changes?).and_return(true)
+            allow(raw_register).to receive(:has_uncommited_changes?).and_return(true)
           end
 
           it "calls commit_changes" do
             expect(raw_register).to receive(:commit_changes)
             raw_register.sync(update: true)
+          end
+        end
+
+        describe "when has_unsynced_changes?" do
+          before do
+            allow(raw_register).to receive(:has_unsynced_changes?).and_return(true)
           end
 
           it "calls push_commits_to_remote" do

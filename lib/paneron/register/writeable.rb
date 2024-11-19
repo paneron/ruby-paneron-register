@@ -18,7 +18,7 @@ module Paneron
           save_sequence
           if !git_client.nil?
             add_changes_to_staging
-            if has_unsynced_changes?
+            if has_uncommited_changes?
               commit_changes("Update #{self.class.name}, from ruby-paneron-register")
             end
           end
@@ -45,8 +45,17 @@ module Paneron
         git_client.add
       end
 
-      def has_unsynced_changes?
+      def has_uncommited_changes?
         git_client.status.added.any?
+      end
+
+      def remote_branch_name
+        "#{@git_remote_name}/#{@git_branch}"
+      end
+
+      def has_unsynced_changes?
+        git_client.branches[remote_branch_name].nil? || git_client.branches[remote_branch_name].sha !=
+          git_client.gcommit("head").sha
       end
 
       def commit_changes(message: nil)
@@ -68,8 +77,12 @@ module Paneron
           end
 
           add_changes_to_staging
-          if has_unsynced_changes?
+
+          if has_uncommited_changes?
             commit_changes(message: message)
+          end
+
+          if has_unsynced_changes?
             push_commits_to_remote
           end
         else
