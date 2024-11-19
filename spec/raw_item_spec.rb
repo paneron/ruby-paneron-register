@@ -16,7 +16,7 @@ RSpec.describe Paneron::Register::Raw::Item do
     describe "with a valid path" do
       subject do
         described_class.new(
-          "00000000-0000-0000-0000-000000000001",
+          "00000000-0000-0001-0001-000000000001",
           "spec/fixtures/test-register/reg-1/item-class-1",
         )
       end
@@ -38,7 +38,7 @@ RSpec.describe Paneron::Register::Raw::Item do
     it "accepts a valid path" do
       expect do
         described_class.new(
-          "00000000-0000-0000-0000-000000000001",
+          "00000000-0000-0001-0001-000000000001",
           "spec/fixtures/test-register/reg-1/item-class-1",
         )
       end.not_to raise_error
@@ -47,7 +47,7 @@ RSpec.describe Paneron::Register::Raw::Item do
 
   let(:item) do
     described_class.new(
-      "00000000-0000-0000-0000-000000000001",
+      "00000000-0000-0001-0001-000000000001",
       "spec/fixtures/test-register/reg-1/item-class-1",
     )
   end

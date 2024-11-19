@@ -420,6 +420,34 @@ RSpec.describe Paneron::Register::Raw::Register do
       end
     end
 
+    describe "#items" do
+      let(:data_sets) { register.data_sets }
+      let(:item_classes) { register.item_classes }
+      subject(:items) { register.items }
+
+      it { is_expected.to be_instance_of(Hash) }
+      its(:length) { is_expected.to eql(27) }
+      its(:keys) do
+        is_expected.to contain_exactly(*data_sets.values.map(&:items).map(&:keys).flatten)
+      end
+
+      describe "each item" do
+        it "is a Paneron::Register::Raw::Item object" do
+          items.each_pair do |_uuid, item|
+            expect(item).to be_instance_of(
+              Paneron::Register::Raw::Item,
+            )
+          end
+        end
+      end
+
+      it "retrieves a specific item object" do
+        expect(register.items("00000000-0000-0001-0001-000000000001")).to be_instance_of(
+          Paneron::Register::Raw::Item,
+        )
+      end
+    end
+
     describe "#data_set_names" do
       subject(:data_set_names) { register.data_set_names }
 

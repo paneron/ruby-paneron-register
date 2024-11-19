@@ -3,7 +3,7 @@
 RSpec.describe Paneron::Register::Item do
   let(:raw_item) do
     Paneron::Register::Raw::Item.new(
-      "00000000-0000-0000-0000-000000000001",
+      "00000000-0000-0001-0001-000000000001",
       "spec/fixtures/test-register/reg-1/item-class-1",
     )
   end
@@ -14,7 +14,7 @@ RSpec.describe Paneron::Register::Item do
 
   describe "#id" do
     subject(:id) { item.id }
-    it { is_expected.to eql("00000000-0000-0000-0000-000000000001") }
+    it { is_expected.to eql("00000000-0000-0001-0001-000000000001") }
   end
 
   describe "#data" do

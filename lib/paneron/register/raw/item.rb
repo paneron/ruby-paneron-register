@@ -87,8 +87,9 @@ module Paneron
           @data = new_data
         end
 
+        # Default is now
         def date_accepted
-          @date_accepted ||= disk_to_h["dateAccepted"]
+          @date_accepted ||= disk_to_h["dateAccepted"] || DateTime.now
         end
 
         def date_accepted=(new_date_accepted)

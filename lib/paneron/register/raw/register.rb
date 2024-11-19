@@ -33,6 +33,7 @@ module Paneron
           @old_path = @register_path
           @data_sets = {}
           @item_classes = {}
+          @items = {}
           @metadata = nil
           @git_save_fn = proc {}
         end
@@ -428,7 +429,7 @@ module Paneron
           end
         end
 
-        # @return Hash of hash
+        # @return Hash of { data_set_name => { item_class_name => ItemClass }}
         #   - ["data_set_name"]["item_class_name"]
         def item_classes(data_set_name = nil, item_class_name = nil)
           if data_set_name.nil? && item_class_name.nil?
@@ -453,6 +454,27 @@ module Paneron
                 File.join(data_set_path(data_set_name), item_class_name),
                 data_set: data_sets[data_set_name],
               )
+          end
+        end
+
+        # @return Hash of { item_uuid => Item }
+        #   - ["uuid"]
+        def items(item_uuid = nil)
+          @items = if !@items.empty?
+                     @items
+                   else
+                     data_sets.reduce({}) do |acc, (_ddata_set_name, data_set)|
+                       data_set.items.each do |iitem_uuid, item|
+                         acc[iitem_uuid] = item
+                       end
+                       acc
+                     end
+                   end
+
+          if item_uuid.nil?
+            @items
+          else
+            @items[item_uuid]
           end
         end
 

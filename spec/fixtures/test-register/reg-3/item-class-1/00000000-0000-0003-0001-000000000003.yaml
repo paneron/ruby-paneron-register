@@ -1,6 +1,6 @@
-id: 00000000-0000-0000-0000-000000000006
+id: 00000000-0000-0003-0001-000000000003
 data:
-  identifier: 6
+  identifier: 3
   name: Sample Item
   blob1: data:text/plain;base64,SGVsbG8sIFdvcmxkIQ==
   remarks: >-
