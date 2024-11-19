@@ -165,11 +165,15 @@ module Paneron
         end
 
         def disk_to_h
-          @disk_to_h ||=
-            YAML.safe_load_file(
-              File.join(item_path),
-              permitted_classes: [Time, Date, DateTime],
-            )
+          if File.exists?(item_path)
+            @disk_to_h ||=
+              YAML.safe_load_file(
+                item_path,
+                permitted_classes: [Time, Date, DateTime],
+              )
+          else
+            {}
+          end
         end
       end
     end
