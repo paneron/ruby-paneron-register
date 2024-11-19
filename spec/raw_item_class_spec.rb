@@ -95,7 +95,7 @@ RSpec.describe Paneron::Register::Raw::ItemClass do
   describe "#add_items" do
     let(:new_item) do
       Paneron::Register::Raw::Item.new(
-        "000z",
+        nil,
         "random/nonexistent/ic-a",
       )
     end
@@ -122,7 +122,7 @@ RSpec.describe Paneron::Register::Raw::ItemClass do
 
     describe "when adding the item class multiple times" do
       let(:new_item_uuid) do
-        "000a-1"
+        "00000000-0000-0000-0000-0000000000a1"
       end
       let(:action) do
         proc {
@@ -143,7 +143,11 @@ RSpec.describe Paneron::Register::Raw::ItemClass do
 
     describe "when adding different item classes" do
       let(:new_item_uuids) do
-        ["ic-a", "ic-b", "ic-c"]
+        [
+          "00000000-0000-0000-0000-000000000001",
+          "00000000-0000-0000-0000-000000000002",
+          "00000000-0000-0000-0000-000000000003",
+        ]
       end
 
       let(:action) do
@@ -160,19 +164,22 @@ RSpec.describe Paneron::Register::Raw::ItemClass do
         expect(&action).to change { raw_item_class.item_uuids.length }.by(3)
       end
     end
+
     it "creates a new Item object" do
+      require "securerandom"
       expect do
-        item_class.spawn_item("000a")
-        item_class.spawn_item("000a")
-        item_class.spawn_item("000a")
+        new_uuid = SecureRandom.uuid
+        item_class.spawn_item(new_uuid)
+        item_class.spawn_item(new_uuid)
+        item_class.spawn_item(new_uuid)
       end.to change { item_class.items.length }.by(1)
     end
 
     it "creates new Item objects" do
       expect do
-        item_class.spawn_item("000a")
-        item_class.spawn_item("000b")
-        item_class.spawn_item("000c")
+        item_class.spawn_item(SecureRandom.uuid)
+        item_class.spawn_item(SecureRandom.uuid)
+        item_class.spawn_item(SecureRandom.uuid)
       end.to change { item_class.items.length }.by(3)
     end
   end
