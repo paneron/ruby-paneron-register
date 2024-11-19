@@ -28,6 +28,7 @@ Gem::Specification.new do |spec|
   # spec.add_runtime_dependency "yaml"
 
   spec.add_runtime_dependency "git", "~> 2.3.1"
+  spec.add_runtime_dependency "uuid", "~> 2.3.9"
   spec.add_runtime_dependency "lutaml-model", "~> 0.3.18"
 
   spec.add_development_dependency "debug"

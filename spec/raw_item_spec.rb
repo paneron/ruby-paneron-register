@@ -5,7 +5,7 @@ RSpec.describe Paneron::Register::Raw::Item do
     describe "with an invalid path" do
       subject do
         described_class.new(
-          "1",
+          "00000000-0000-0000-0000-000000000001",
           "spec/fixtures/test-register/doesnotexist/item-class-1",
         )
       end
@@ -26,6 +26,15 @@ RSpec.describe Paneron::Register::Raw::Item do
   end
 
   describe "#initialize" do
+    it "rejects invalid UUID" do
+      expect do
+        described_class.new(
+          "00000000-0000-0000-0000-00000000001",
+          "spec/fixtures/test-register/reg-1/item-class-1",
+        )
+      end.to raise_error Paneron::Register::Error
+    end
+
     it "accepts a valid path" do
       expect do
         described_class.new(

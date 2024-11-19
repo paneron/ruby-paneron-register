@@ -136,7 +136,7 @@ module Paneron
           end
         end
 
-        def spawn_item(item_uuid)
+        def spawn_item(item_uuid = nil)
           new_item = Paneron::Register::Raw::Item.new(
             item_uuid,
             item_class: self,

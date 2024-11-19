@@ -15,7 +15,7 @@ module Paneron
         attr_accessor :item_class
 
         def initialize(
-          item_uuid,
+          item_uuid = nil,
           item_class_path = nil,
           extension = "yaml",
           item_class: nil
@@ -30,7 +30,18 @@ module Paneron
                           item_class
                         end
 
-          @item_uuid = item_uuid
+          require "securerandom"
+          require "uuid"
+
+          @item_uuid = if item_uuid.nil? || item_uuid.empty?
+                         SecureRandom.uuid
+                       elsif UUID.validate(item_uuid)
+                         item_uuid
+                       else
+                         raise Paneron::Register::Error,
+                               "Specified UUID not valid (#{item_uuid})"
+                       end
+
           @extension = extension
           @to_h = nil
           @status = nil
