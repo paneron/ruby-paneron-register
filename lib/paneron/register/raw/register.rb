@@ -90,7 +90,7 @@ module Paneron
               # TODO
               # URL changed.
               # Defer.
-              if @old_git_url != git_url
+              if git_url_changed?(git_url)
                 @git_client = nil
                 @git_save_fn = git_init_fn
               else
@@ -139,7 +139,7 @@ module Paneron
             }
 
             # URL changed. Use save fn.
-            if @old_git_url != git_url
+            if git_url_changed?(git_url)
               @git_client = nil
               @git_save_fn = git_clone_fn
             else
@@ -394,22 +394,28 @@ module Paneron
           git_client.add_remote("origin", new_url)
         end
 
-        # For abstraction
-        def self.clone_git_repo(git_url, repo_path)
-          Git.clone(git_url, repo_path)
-        end
-
-        def self.open_git_repo(repo_path)
-          Git.open(repo_path)
-        end
-
-        def self.init_git_repo(repo_path)
-          Git.init(repo_path)
+        def git_url_changed?(url = @git_url)
+          @old_git_url != url
         end
 
         def data_set_lutamls
           data_sets.map do |_data_set_name, data_set|
             data_set.to_lutaml
+          end
+        end
+
+        # For abstraction
+        class << self
+          def clone_git_repo(git_url, repo_path)
+            Git.clone(git_url, repo_path)
+          end
+
+          def open_git_repo(repo_path)
+            Git.open(repo_path)
+          end
+
+          def init_git_repo(repo_path)
+            Git.init(repo_path)
           end
         end
       end
