@@ -16,15 +16,138 @@ module Paneron
         def initialize(
           register_path,
           git_url: nil,
-          git_client: nil
+          update_git: nil
         )
-          @git_url = git_url
-          @git_client = git_client
-
+          @old_git_url = @git_url = git_url
           @register_path = register_path
+          setup_git(
+            git_url: git_url,
+            path: register_path,
+            update: update_git,
+          )
+
           @old_path = @register_path
           @data_sets = {}
           @metadata = nil
+          @git_save_fn = proc {}
+        end
+
+        # Defer all mkdir until #save_sequence
+        def setup_git(git_url: nil, path: nil, update: nil)
+          require "git"
+          self.class.setup_cache_path
+
+          if git_url.nil? && path.nil?
+            raise Paneron::Register::Error,
+                  "Must supply either git_url or path."
+          end
+
+          repo_path = if path.nil?
+                        self.class.calculate_repo_cache_path(git_url)
+                      else
+                        path
+                      end
+
+          #------------------------------------
+          #     | dir   | Git.open(dir)
+          # no  |exists |
+          # git |-------|----------------------
+          # url | dir   | mkdirp &&
+          #     |!exists| Git.open(dir) ? Git.init(dir)
+          #------------------------------------
+          #     | dir   | Git.open(dir) &&
+          # has |exists | remote? ? check remote : add remote
+          # git |-------|----------------------
+          # url | dir   | Git.clone(url, dir) ||
+          #     |!exists| mkdirp && Git.open(dir) ? Git.init(dir) &&
+          #     |       | add remote
+          #------------------------------------
+
+          if git_url.nil?
+            if File.exists?(repo_path)
+              # No remote, but local repo path exists.
+              # Simply open it as a Git repo.
+              @git_save_fn = nil
+              begin
+                self.class.open_git_repo(repo_path)
+              rescue ArgumentError => e
+                if /not in a git working tree/.match?(e.message)
+                  @git_save_fn = proc {
+                    self.class.init_git_repo(repo_path)
+                  }
+                else
+                  raise e
+                end
+              end
+            else
+              # No remote, and local repo path does not exist.
+              git_init_fn = proc {
+                FileUtils.mkdir_p(repo_path)
+                _g = self.class.init_git_repo(repo_path)
+                @git_client = _g
+              }
+
+              # TODO
+              # URL changed.
+              # Defer.
+              if @old_git_url != git_url
+                @git_client = nil
+                @git_save_fn = git_init_fn
+              else
+                @git_save_fn = nil
+                git_init_fn.call
+              end
+
+            end
+          elsif File.exists?(repo_path)
+            # Has remote, as well as local repo path.
+            @git_save_fn = nil
+            _g = self.class.open_git_repo(repo_path)
+
+            # Check if remote matches the provided git_url
+            if !_g.remote("origin").url.nil? && _g.remote("origin").url != git_url
+
+              raise Paneron::Register::Error,
+                    "Git remote @ #{clone_path} already exists " \
+                    "(#{_g.remote('origin').url}) " \
+                    "but does not match provided URL (#{git_url}).\n" \
+                    "Instead, use `r = #{self}.new(\"#{path}\")` and "\
+                    "`r.git_url = \"#{git_url}\"` to change its Git URL."
+            end
+            change_git_remote(git_url, git_client: _g)
+
+            # Pull-rebase to update it
+            if update
+              _g.pull(
+                nil, nil, rebase: true
+              )
+            end
+
+            @git_client = _g
+          else
+            git_clone_fn = proc {
+              begin
+                _g = self.class.clone_git_repo(git_url, repo_path)
+                change_git_remote(git_url, git_client: _g)
+                @git_client = _g
+              rescue Git::TimeoutError => e
+                e.result.tap do |_r|
+                  warn "Timed out trying to clone #{repo_url}."
+                  raise e
+                end
+              end
+            }
+
+            # URL changed. Use save fn.
+            if @old_git_url != git_url
+              @git_client = nil
+              @git_save_fn = git_clone_fn
+            else
+              # Path is nil.  Clone repo.
+              @git_save_fn = nil
+              git_clone_fn.call
+            end
+          end
         end
 
         def register_yaml_path
@@ -48,6 +171,10 @@ module Paneron
             @old_path = self_path
           else
             FileUtils.mkdir_p(self_path)
+          end
+
+          if @git_client.nil?
+            @git_save_fn.call
           end
 
           if @metadata.nil? || @metadata.empty?
@@ -147,41 +274,24 @@ module Paneron
           new(register_path, git_url: git_url).save
         end
 
-        def self.from_git(repo_url, update: true)
-          require "git"
-          setup_cache_path
+        def self.calculate_repo_cache_name(repo_url)
+          "#{File.basename(repo_url)}-#{calculate_repo_cache_hash(repo_url)}"
+        end
+
+        def self.calculate_repo_cache_path(repo_url)
           repo_cache_name =
-            "#{File.basename(repo_url)}-#{calculate_repo_cache_hash(repo_url)}"
+            calculate_repo_cache_name(repo_url)
 
           # Check if repo is already cloned
-          full_local_cache_path = File.join(local_cache_path, repo_cache_name)
-          g = begin
-            if File.exist?(full_local_cache_path)
-              _g = Git.open(full_local_cache_path)
+          File.join(local_cache_path, repo_cache_name)
+        end
 
-              # Pull-rebase to update it
-              if update
-                _g.pull(
-                  nil, nil, rebase: true
-                )
-              end
-              _g
-            else
-              Git.clone(
-                repo_url,
-                repo_cache_name,
-                path: local_cache_path,
-                # timeout: 30,
-              )
-            end
-          rescue Git::TimeoutError => e
-            e.result.tap do |_r|
-              warn "Timed out trying to clone #{repo_url}."
-              raise e
-            end
-          end
+        def git_url=(new_url)
+          setup_git(git_url: new_url, path: self_path)
+        end
 
-          new(g.dir.path, git_url: repo_url, git_client: g)
+        def self.from_git(repo_url, path: nil, update: true)
+          new(path, git_url: repo_url, update_git: true)
         end
 
         REGISTER_METADATA_FILENAME = "/paneron.yaml"
@@ -278,6 +388,24 @@ module Paneron
         end
 
         private
+
+        def change_git_remote(new_url, git_client: @git_client)
+          git_client.remote("origin").remove unless git_client.remote("origin").url.nil?
+          git_client.add_remote("origin", new_url)
+        end
+
+        # For abstraction
+        def self.clone_git_repo(git_url, repo_path)
+          Git.clone(git_url, repo_path)
+        end
+
+        def self.open_git_repo(repo_path)
+          Git.open(repo_path)
+        end
+
+        def self.init_git_repo(repo_path)
+          Git.init(repo_path)
+        end
 
         def data_set_lutamls
           data_sets.map do |_data_set_name, data_set|

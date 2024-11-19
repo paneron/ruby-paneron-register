@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "git"
+
 RSpec.describe Paneron::Register::Raw::Register do
   describe ".generate" do
     let(:register_path) do
@@ -8,6 +10,13 @@ RSpec.describe Paneron::Register::Raw::Register do
 
     let(:git_url) do
       "https://github.com/paneron/test-register.git"
+    end
+
+    before do
+      allow(described_class).to receive(:clone_git_repo)
+        .with(git_url, register_path) do
+          Git.init(register_path)
+        end
     end
 
     it "generates a new register" do

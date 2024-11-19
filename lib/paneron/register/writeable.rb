@@ -66,6 +66,7 @@ module Paneron
           if update
             pull_from_remote
           end
+
           add_changes_to_staging
           if has_unsynced_changes?
             commit_changes(message: message)
