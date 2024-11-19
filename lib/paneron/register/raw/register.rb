@@ -68,12 +68,17 @@ module Paneron
               # No remote, but local repo path exists.
               # Simply open it as a Git repo.
               @git_save_fn = nil
+
               begin
-                self.class.open_git_repo(repo_path)
+                @git_client = self.class.open_git_repo(repo_path)
+                log_change_git_remote(nil)
+                change_git_remote(nil)
               rescue ArgumentError => e
                 if /not in a git working tree/.match?(e.message)
                   @git_save_fn = proc {
-                    self.class.init_git_repo(repo_path)
+                    @git_client = self.class.init_git_repo(repo_path)
+                    log_change_git_remote(nil)
+                    change_git_remote(nil)
                   }
                 else
                   raise e
@@ -83,53 +88,46 @@ module Paneron
               # No remote, and local repo path does not exist.
               git_init_fn = proc {
                 FileUtils.mkdir_p(repo_path)
-                _g = self.class.init_git_repo(repo_path)
-                @git_client = _g
+                @git_client = self.class.init_git_repo(repo_path)
+                log_change_git_remote(nil)
+                change_git_remote(nil)
               }
 
-              # TODO
-              # URL changed.
-              # Defer.
-              if git_url_changed?(git_url)
-                @git_client = nil
-                @git_save_fn = git_init_fn
-              else
-                @git_save_fn = nil
-                git_init_fn.call
-              end
+              # Defer creation of directory until #save_sequence
+              @git_client = nil
+              @git_save_fn = git_init_fn
 
             end
           elsif File.exists?(repo_path)
             # Has remote, as well as local repo path.
             @git_save_fn = nil
-            _g = self.class.open_git_repo(repo_path)
+            @git_client = self.class.open_git_repo(repo_path)
 
             # Check if remote matches the provided git_url
-            if !_g.remote("origin").url.nil? && _g.remote("origin").url != git_url
+            if !@git_client.remote("origin").url.nil? && @git_client.remote("origin").url != git_url
 
               raise Paneron::Register::Error,
                     "Git remote @ #{clone_path} already exists " \
-                    "(#{_g.remote('origin').url}) " \
+                    "(#{@git_client.remote('origin').url}) " \
                     "but does not match provided URL (#{git_url}).\n" \
                     "Instead, use `r = #{self}.new(\"#{path}\")` and "\
                     "`r.git_url = \"#{git_url}\"` to change its Git URL."
             end
-            change_git_remote(git_url, git_client: _g)
+            log_change_git_remote(git_url)
+            change_git_remote(git_url)
 
             # Pull-rebase to update it
             if update
-              _g.pull(
+              @git_client.pull(
                 nil, nil, rebase: true
               )
             end
 
-            @git_client = _g
           else
             git_clone_fn = proc {
               begin
-                _g = self.class.clone_git_repo(git_url, repo_path)
-                change_git_remote(git_url, git_client: _g)
-                @git_client = _g
+                @git_client = self.class.clone_git_repo(git_url, repo_path)
+                change_git_remote(git_url)
               rescue Git::TimeoutError => e
                 e.result.tap do |_r|
                   warn "Timed out trying to clone #{repo_url}."
@@ -140,10 +138,12 @@ module Paneron
 
             # URL changed. Use save fn.
             if git_url_changed?(git_url)
+              log_change_git_remote(git_url)
               @git_client = nil
               @git_save_fn = git_clone_fn
             else
               # Path is nil.  Clone repo.
+              log_change_git_remote(git_url)
               @git_save_fn = nil
               git_clone_fn.call
             end
@@ -389,9 +389,18 @@ module Paneron
 
         private
 
+        def log_change_git_remote(new_url)
+          @old_git_url = @git_url
+          @git_url = new_url
+        end
+
         def change_git_remote(new_url, git_client: @git_client)
-          git_client.remote("origin").remove unless git_client.remote("origin").url.nil?
-          git_client.add_remote("origin", new_url)
+          if !git_client.remote("origin").url.nil?
+            git_client.remote("origin").remove
+            if !new_url.nil?
+              git_client.add_remote("origin", new_url)
+            end
+          end
         end
 
         def git_url_changed?(url = @git_url)

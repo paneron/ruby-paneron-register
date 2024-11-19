@@ -12,6 +12,8 @@ RSpec.describe Paneron::Register::Raw::Register do
       "https://github.com/paneron/test-register.git"
     end
 
+    # Instead of actually cloning from the remote,
+    # git init (creating a directory locally).
     before do
       allow(described_class).to receive(:clone_git_repo)
         .with(git_url, register_path) do
@@ -42,6 +44,69 @@ RSpec.describe Paneron::Register::Raw::Register do
     described_class.new(
       "spec/fixtures/test-register",
     )
+  end
+
+  describe "#git_url=" do
+    # Instead of actually cloning from the remote,
+    # git init (creating a directory locally).
+    before do
+      allow(described_class).to receive(:clone_git_repo) do |_git_url, register_path|
+        Git.init(register_path)
+      end
+    end
+
+    let(:register_path) do
+      "spec/fixtures/test-new-register"
+    end
+
+    let(:raw_register) do
+      described_class.new(
+        register_path,
+        git_url: old_git_url,
+      )
+    end
+
+    let(:action) do
+      proc {
+        raw_register.git_url = new_git_url
+      }
+    end
+
+    shared_examples_for "changes git URL" do
+      it "changes git URL" do
+        expect(&action).to change {
+          raw_register.git_url
+        }.from(old_git_url).to(new_git_url)
+      end
+    end
+
+    describe "from remote to nil" do
+      let(:old_git_url) do
+        "https://github.com/paneron/test-register.git"
+      end
+      let(:new_git_url) { nil }
+      include_examples "changes git URL"
+    end
+
+    describe "from nil to remote" do
+      let(:new_git_url) do
+        "https://github.com/paneron/test-register.git"
+      end
+      let(:old_git_url) { nil }
+
+      include_examples "changes git URL"
+    end
+
+    describe "from remote 1 to remote 2" do
+      let(:old_git_url) do
+        "https://github.com/paneron/test-register.git"
+      end
+      let(:new_git_url) do
+        "https://github.com/paneron/test-register-2.git"
+      end
+
+      include_examples "changes git URL"
+    end
   end
 
   describe "#sync" do
