@@ -383,12 +383,41 @@ RSpec.describe Paneron::Register::Raw::Register do
           end
         end
       end
+
+      it "retrieves a specific data set object" do
+        expect(register.data_sets("reg-1")).to be_instance_of(
+          Paneron::Register::Raw::DataSet,
+        )
+      end
     end
 
-    it "retrieves a specific data set object" do
-      expect(register.data_sets("reg-1")).to be_instance_of(
-        Paneron::Register::Raw::DataSet,
-      )
+    describe "#item_classes" do
+      let(:data_sets) { register.data_sets }
+      subject(:item_classes) { register.item_classes }
+
+      it { is_expected.to be_instance_of(Hash) }
+      its(:length) { is_expected.to eql(3) }
+      its(:keys) do
+        is_expected.to contain_exactly(*data_sets.keys)
+      end
+
+      describe "each item" do
+        it "is a Hash of String => Paneron::Register::Raw::ItemClass object" do
+          item_classes.each_pair do |_ds_name, ds_stuff|
+            ds_stuff.each_pair do |_ic_name, item_class|
+              expect(item_class).to be_instance_of(
+                Paneron::Register::Raw::ItemClass,
+              )
+            end
+          end
+        end
+      end
+
+      it "retrieves a specific item class object" do
+        expect(register.item_classes("reg-1", "item-class-1")).to be_instance_of(
+          Paneron::Register::Raw::ItemClass,
+        )
+      end
     end
 
     describe "#data_set_names" do

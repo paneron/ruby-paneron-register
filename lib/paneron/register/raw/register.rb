@@ -32,6 +32,7 @@ module Paneron
 
           @old_path = @register_path
           @data_sets = {}
+          @item_classes = {}
           @metadata = nil
           @git_save_fn = proc {}
         end
@@ -423,6 +424,34 @@ module Paneron
               Paneron::Register::Raw::DataSet.new(
                 File.join(register_path, data_set_name),
                 register: self,
+              )
+          end
+        end
+
+        # @return Hash of hash
+        #   - ["data_set_name"]["item_class_name"]
+        def item_classes(data_set_name = nil, item_class_name = nil)
+          if data_set_name.nil? && item_class_name.nil?
+            @item_classes = if !@item_classes.empty?
+                              @item_classes
+                            else
+                              data_sets.reduce({}) do |acc, (ddata_set_name, data_set)|
+                                acc[ddata_set_name] ||= {}
+                                data_set.item_class_names.each do |item_klass_name|
+                                  acc[ddata_set_name][item_klass_name] =
+                                    item_classes(ddata_set_name, item_klass_name)
+                                end
+                                acc
+                              end
+                            end
+          elsif item_class_name.nil?
+            item_classes[data_set_name]
+          else
+            @item_classes[data_set_name] ||= {}
+            @item_classes[data_set_name][item_class_name] ||=
+              Paneron::Register::Raw::ItemClass.new(
+                File.join(data_set_path(data_set_name), item_class_name),
+                data_set: data_sets[data_set_name],
               )
           end
         end
