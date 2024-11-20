@@ -402,10 +402,14 @@ module Paneron
         end
 
         def metadata
-          @metadata ||= YAML.safe_load_file(
-            register_yaml_path,
-            permitted_classes: [Time, Date, DateTime],
-          )
+          @metadata ||= begin
+            YAML.safe_load_file(
+              register_yaml_path,
+              permitted_classes: [Time, Date, DateTime],
+            )
+          rescue Errno::ENOENT
+            self.class.metadata_template
+          end
         end
 
         def metadata=(metadata)

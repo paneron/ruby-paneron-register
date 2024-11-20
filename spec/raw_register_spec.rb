@@ -471,18 +471,30 @@ RSpec.describe Paneron::Register::Raw::Register do
   end
 
   describe "#title=" do
-    it "updates the metadata title" do
-      expect do
-        raw_register.title = "new title"
-      end.to change { raw_register.metadata["title"] }.from("register").to("new title")
+    shared_examples_for "changes title" do |old_title|
+      it "updates the metadata title" do
+        expect do
+          raw_register.title = "new title"
+        end.to change { raw_register.metadata["title"] }.from(old_title).to("new title")
 
-      expect do
-        raw_register.title = "new title"
-      end.to_not(change { raw_register.metadata["title"] })
+        expect do
+          raw_register.title = "new title"
+        end.to_not(change { raw_register.metadata["title"] })
 
-      expect do
-        raw_register.title = "new title 2"
-      end.to change { raw_register.title }.from("new title").to("new title 2")
+        expect do
+          raw_register.title = "new title 2"
+        end.to change { raw_register.title }.from("new title").to("new title 2")
+      end
+    end
+
+    it_behaves_like "changes title", "register"
+
+    describe "for an unsaved register" do
+      let(:raw_register) do
+        described_class.new("./another/new/register")
+      end
+
+      it_behaves_like "changes title", ""
     end
   end
 end
