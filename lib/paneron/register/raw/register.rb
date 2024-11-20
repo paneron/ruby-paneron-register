@@ -378,8 +378,8 @@ module Paneron
           )
         end
 
-        def data_set_names
-          if @data_sets.empty?
+        def data_set_names(refresh: false)
+          if refresh || @data_sets.empty?
             Dir.glob(
               File.join(
                 register_path,
@@ -410,16 +410,18 @@ module Paneron
           @metadata = metadata
         end
 
-        def data_sets(data_set_name = nil)
+        def data_sets(data_set_name = nil, refresh: false)
           if data_set_name.nil?
-            @data_sets = if !@data_sets.empty?
+            @data_sets = if !refresh && !@data_sets.empty?
                            @data_sets
                          else
-                           data_set_names.reduce({}) do |acc, data_set_name|
+                           data_set_names(refresh: refresh).reduce({}) do |acc, data_set_name|
                              acc[data_set_name] = data_sets(data_set_name)
                              acc
                            end
                          end
+          elsif refresh
+            data_sets(refresh: true)[data_set_name]
           else
             @data_sets[data_set_name] ||=
               Paneron::Register::Raw::DataSet.new(
@@ -431,9 +433,9 @@ module Paneron
 
         # @return Hash of { data_set_name => { item_class_name => ItemClass }}
         #   - ["data_set_name"]["item_class_name"]
-        def item_classes(data_set_name = nil, item_class_name = nil)
+        def item_classes(data_set_name = nil, item_class_name = nil, refresh: false)
           if data_set_name.nil? && item_class_name.nil?
-            @item_classes = if !@item_classes.empty?
+            @item_classes = if !refresh && !@item_classes.empty?
                               @item_classes
                             else
                               data_sets.reduce({}) do |acc, (ddata_set_name, data_set)|
@@ -446,7 +448,9 @@ module Paneron
                               end
                             end
           elsif item_class_name.nil?
-            item_classes[data_set_name]
+            item_classes(refresh: refresh)[data_set_name]
+          elsif refresh
+            item_classes(refresh: true)[data_set_name][item_class_name]
           else
             @item_classes[data_set_name] ||= {}
             @item_classes[data_set_name][item_class_name] ||=
@@ -459,11 +463,11 @@ module Paneron
 
         # @return Hash of { item_uuid => Item }
         #   - ["uuid"]
-        def items(item_uuid = nil)
-          @items = if !@items.empty?
+        def items(item_uuid = nil, refresh: false)
+          @items = if !refresh && !@items.empty?
                      @items
                    else
-                     data_sets.reduce({}) do |acc, (_ddata_set_name, data_set)|
+                     data_sets(refresh: refresh).reduce({}) do |acc, (_ddata_set_name, data_set)|
                        data_set.items.each do |iitem_uuid, item|
                          acc[iitem_uuid] = item
                        end

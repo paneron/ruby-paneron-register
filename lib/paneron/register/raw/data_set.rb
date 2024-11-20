@@ -195,16 +195,18 @@ module Paneron
           end
         end
 
-        def item_classes(item_class_name = nil)
+        def item_classes(item_class_name = nil, refresh: false)
           if item_class_name.nil?
-            @item_classes = if !@item_classes.empty?
+            @item_classes = if !refresh && !@item_classes.empty?
                               @item_classes
                             else
-                              item_class_names.reduce({}) do |acc, item_class_name|
+                              item_class_names(refresh: refresh).reduce({}) do |acc, item_class_name|
                                 acc[item_class_name] = item_classes(item_class_name)
                                 acc
                               end
                             end
+          elsif refresh
+            item_classes[item_class_name]
           else
             @item_classes[item_class_name] ||=
               Paneron::Register::Raw::ItemClass.new(
@@ -225,8 +227,8 @@ module Paneron
           new_item_class
         end
 
-        def item_class_names
-          if @item_classes.empty?
+        def item_class_names(refresh: false)
+          if refresh || @item_classes.empty?
             Dir.glob(File.join(data_set_path, "*/*.#{extension}"))
               .map { |file| File.basename(File.dirname(file)) }.to_set
           else
@@ -238,9 +240,9 @@ module Paneron
           item_classes.values.map(&:item_uuids).to_set.flatten
         end
 
-        def items(uuid = nil, item_class_name = nil)
+        def items(uuid = nil, item_class_name = nil, refresh: false)
           if uuid.nil?
-            @items = if !@items.empty?
+            @items = if !refresh && !@items.empty?
                        @items
                      else
                        item_classes.reduce({}) do |acc, (item_klass_name, item_klass)|
@@ -250,6 +252,8 @@ module Paneron
                          acc
                        end
                      end
+          elsif refresh
+            items[uuid]
           else
             @items[uuid] ||=
               Paneron::Register::Raw::Item.new(

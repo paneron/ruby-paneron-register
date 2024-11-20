@@ -156,12 +156,18 @@ module Paneron
           end
         end
 
-        def items(uuid = nil)
+        def items(uuid = nil, refresh: false)
           if uuid.nil?
-            item_uuids.reduce({}) do |acc, uuid|
-              acc[uuid] = items(uuid)
-              acc
-            end
+            @items = if !refresh && !@items.empty?
+                       @items
+                     else
+                       item_uuids.reduce({}) do |acc, uuid|
+                         acc[uuid] = items(uuid)
+                         acc
+                       end
+                     end
+          elsif refresh
+            items[uuid]
           else
             @items[uuid] ||=
               Paneron::Register::Raw::Item.new(
