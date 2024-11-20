@@ -1,0 +1,91 @@
+= Examples
+
+NOTE: Follow link:../spec/worked_examples_spec.rb[`spec/worked_examples_spec.rb`] for continuously integrated examples.
+
+In this document, you'll find examples of how to use the library.
+
+The following examples assume this preamble:
+
+[source,ruby]
+----
+require "paneron/register"
+include Paneron::Register
+----
+
+
+== Create a register
+
+=== From scratch
+
+[source,ruby]
+----
+register = Raw::Register.generate(
+  "/local/path/to/directory/can/be/empty",
+  git_url: "git URL",
+  )
+
+# Create a data set
+ds =
+  register.spawn_data_set("data_set_name")
+
+# Register#save commits the data to git.
+register.save
+
+# Register#sync pushes the commits to git remote.
+register.sync
+----
+
+
+=== From an existing Git repository
+
+[source,ruby]
+----
+register = Raw::Register.from_git("git URL")
+----
+
+
+== Register an item class
+
+[source,ruby]
+----
+data_set = register.spawn_data_set("data_set_name").save
+item_class = data_set.spawn_item_class("item_class_name").save
+----
+
+== Store a file in the item
+
+[source,ruby]
+----
+item = item_class.spawn_item
+item.data = "file contents"
+item.save
+
+# Take a note of its UUID for future retrieval
+item_uuid = item.uuid
+----
+
+== Write the item to register (sync local to remote)
+
+[source,ruby]
+----
+# Register#sync
+# Register#sync pushes the commits to git remote.
+register.sync
+----
+
+== Fetch the item for use
+
+[source,ruby]
+----
+# Register.from_git clones the repo to local cache.
+# It automatically calls `git pull --rebase` to sync with remote.
+register = Raw::Register.from_git("git URL")
+item = register.items(item_uuid)
+----
+
+== Obtain the file from the item
+
+[source,ruby]
+----
+file = item.data
+----

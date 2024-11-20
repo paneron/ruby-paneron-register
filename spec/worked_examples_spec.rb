@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# In this document, you'll find examples of how to use the library.
+# In this document, you may find examples of how to use Paneron::Register.
 
 # ====
 # = Examples

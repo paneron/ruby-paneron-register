@@ -15,7 +15,8 @@ gem install paneron-register
 
 == Usage
 
-```ruby
+[source,ruby]
+----
 require "paneron/register"
 include Paneron::Register
 
@@ -83,8 +84,12 @@ blob1 = raw_item["data"]["blob1"]
 item = raw_item.to_lutaml
 id = item.to_h["id"]
 blob1 = item.to_h["data"]["blob1"]
-```
+----
+
+For more usage examples, see link:docs/examples.adoc[`Examples`^]
+and related link:spec/worked_examples_spec.rb[`spec/worked_examples_spec.rb`^].
+
 
 == License
 
-See LICENSE.txt
+See link:LICENSE.txt[`LICENSE.txt`]
