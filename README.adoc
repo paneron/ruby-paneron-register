@@ -90,6 +90,127 @@ For more usage examples, see link:docs/examples.adoc[`Examples`^]
 and related link:spec/worked_examples_spec.rb[`spec/worked_examples_spec.rb`^].
 
 
+== Development
+
+Git clone this repository, then install dependencies.
+
+[source,shell]
+----
+git clone https://github.com/paneron/ruby-paneron-register
+cd ruby-paneron-register
+bundle install
+----
+
+=== Without Nix
+
+Open development shell (`irb`) with:
+
+[source,shell]
+----
+bundle exec irb
+----
+
+Open development shell (`pry`) with:
+
+[source,shell]
+----
+bundle exec pry
+----
+
+Run tests with:
+
+[source,shell]
+----
+bundle exec rspec
+# or
+bundle exec rake spec
+----
+
+Run lint with:
+
+[source,shell]
+----
+bundle exec rubocop
+----
+
+Run lint with autocorrect with:
+
+[source,shell]
+----
+bundle exec rubocop -a
+----
+
+Release to Rubygem (adds a Git tag, pushes to GitHub and releases to Rubygem) with:
+
+[source,shell]
+----
+bundle exec rake release
+----
+
+=== With Nix
+
+If your system is using Nix, run the following to gain access to shell aliases:
+
+[source,shell]
+----
+nix develop
+----
+
+Open development shell (`irb`) with:
+
+[source,shell]
+----
+irb
+# or
+console
+----
+
+Open development shell (`pry`) with:
+
+[source,shell]
+----
+pry
+----
+
+Run tests with:
+
+[source,shell]
+----
+rspec
+----
+
+Run lint with:
+
+[source,shell]
+----
+lint
+# or
+rubocop
+----
+
+Run lint with autocorrect with:
+
+[source,shell]
+----
+lint -a
+# or
+rubocop -a
+----
+
+Release to Rubygem (adds a Git tag, pushes to GitHub and releases to Rubygem) with:
+
+[source,shell]
+----
+release
+----
+
+Update Nix flakes with:
+
+[source,shell]
+----
+update-flakes
+----
+
 == License
 
 See link:LICENSE.txt[`LICENSE.txt`]
