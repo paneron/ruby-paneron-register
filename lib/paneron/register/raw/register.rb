@@ -177,6 +177,7 @@ module Paneron
               end
             }
 
+            # rubocop:disable Style/IdenticalConditionalBranches
             # URL changed. Use save fn.
             if git_url_changed?(git_url)
               log_change_git_remote(git_url)
@@ -188,6 +189,7 @@ module Paneron
               @git_save_fn = nil
               git_clone_fn.call
             end
+            # rubocop:enable Style/IdenticalConditionalBranches
           end
         end
 
