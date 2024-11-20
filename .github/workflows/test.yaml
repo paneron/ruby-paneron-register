@@ -17,15 +17,36 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+
+    concurrency:
+      group: '${{ github.workflow }}-${{ matrix.os }}-${{ matrix.ruby.version }}-${{ github.head_ref || github.ref_name }}'
+      cancel-in-progress: true
+
     strategy:
+      fail-fast: false
+      max-parallel: 5
       matrix:
-        ruby-version: ['3.4', '3.3', '3.2', '3.1']
+        os:
+        - "macos-latest"
+        - "ubuntu-latest"
+        - "windows-latest"
+        ruby:
+          - version: '3.4'
+            experimental: true
+          - version: '3.3'
+            experimental: false
+          - version: '3.2'
+            experimental: false
+          - version: '3.1'
+            experimental: false
+    continue-on-error: ${{ matrix.ruby.experimental }}
+
     steps:
       - uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: ${{ matrix.ruby-version }}
+          ruby-version: ${{ matrix.ruby.version }}
           bundler-cache: true
       - name: Install dependencies
         run: bundle install
