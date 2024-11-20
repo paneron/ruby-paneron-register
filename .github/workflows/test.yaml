@@ -40,6 +40,11 @@ jobs:
             experimental: false
           - version: '3.1'
             experimental: false
+        exclude:
+        - os: windows-latest
+          ruby:
+            version: 3.4
+            experimental: true
     continue-on-error: ${{ matrix.ruby.experimental }}
 
     steps:
