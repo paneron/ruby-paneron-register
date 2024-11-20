@@ -211,6 +211,23 @@ Update Nix flakes with:
 update-flakes
 ----
 
+== Release workflow
+
+When actually creating a new version for release, do the following:
+
+. Update the `VERSION` in file link:lib/paneron/register/version.rb[`lib/paneron/register/version.rb`^].
+. [[:space:]]
++
+[source,shell]
+----
+git add lib/paneron/register/version.rb
+git commit -m 'chore: Release vX.Y.Z' # change X.Y.Z to actual version
+git push
+
+# Run rake release
+bundle exec rake release
+----
+
 == License
 
 See link:LICENSE.txt[`LICENSE.txt`]
