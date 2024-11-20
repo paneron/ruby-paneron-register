@@ -58,8 +58,8 @@ module Paneron
           git_client.gcommit("head").sha
       end
 
-      def commit_changes(message: nil)
-        git_client.commit(message.nil? ? "Sync from ruby-paneron-register" : message)
+      def commit_changes(message = nil)
+        git_client.commit(message.nil? || message.empty? ? "Sync from ruby-paneron-register" : message)
       end
 
       def push_commits_to_remote
@@ -79,7 +79,7 @@ module Paneron
           add_changes_to_staging
 
           if has_uncommited_changes?
-            commit_changes(message: message)
+            commit_changes(message)
           end
 
           if has_unsynced_changes?

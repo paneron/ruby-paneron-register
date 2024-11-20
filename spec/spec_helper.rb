@@ -27,6 +27,10 @@ require "rspec-command"
 
 # See https://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 RSpec.configure do |config|
+  def optional(type)
+    satisfy { |value| value.nil? || value.is_a?(type) }
+  end
+
   # rspec-expectations config goes here. You can use an alternate
   # assertion/expectation library such as wrong or the stdlib/minitest
   # assertions if you prefer.

@@ -134,7 +134,7 @@ RSpec.describe Paneron::Register::Raw::Register do
         allow(raw_register).to receive(:remote?).and_return(true)
         allow(raw_register).to receive(:pull_from_remote)
         allow(raw_register).to receive(:add_changes_to_staging)
-        allow(raw_register).to receive(:commit_changes)
+        allow(raw_register).to receive(:commit_changes).with(optional(String))
         allow(raw_register).to receive(:has_unsynced_changes?)
         allow(raw_register).to receive(:has_uncommited_changes?)
         allow(raw_register).to receive(:push_commits_to_remote)
@@ -157,7 +157,7 @@ RSpec.describe Paneron::Register::Raw::Register do
           end
 
           it "calls commit_changes" do
-            expect(raw_register).to receive(:commit_changes)
+            expect(raw_register).to receive(:commit_changes).with(optional(String))
             raw_register.sync(update: true)
           end
         end
