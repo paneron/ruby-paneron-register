@@ -292,7 +292,7 @@ module Paneron
             )
           else
             File.join(
-              Dir.exist?(ENV["XDG_CACHE_HOME"]) ? ENV["XDG_CACHE_HOME"] : "~/.cache",
+              Dir.exist?(ENV["XDG_CACHE_HOME"].to_s) ? ENV["XDG_CACHE_HOME"] : "~/.cache",
               "ruby-paneron-register",
             )
           end
