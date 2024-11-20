@@ -166,7 +166,7 @@ module Paneron
         end
 
         def disk_to_h
-          if File.exists?(item_path)
+          if File.exist?(item_path)
             @disk_to_h ||=
               YAML.safe_load_file(
                 item_path,

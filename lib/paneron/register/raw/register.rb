@@ -88,7 +88,7 @@ module Paneron
           #------------------------------------
 
           if git_url.nil?
-            if File.exists?(repo_path)
+            if File.exist?(repo_path)
               # No remote, but local repo path exists.
               # Simply open it as a Git repo.
               @git_save_fn = nil
@@ -123,7 +123,7 @@ module Paneron
               @git_save_fn = git_init_fn
 
             end
-          elsif File.exists?(repo_path)
+          elsif File.exist?(repo_path)
             # Has remote, as well as local repo path.
             @git_save_fn = nil
 
