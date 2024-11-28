@@ -69,6 +69,7 @@ RSpec.describe Paneron::Register::Raw::Register do
     let(:action) do
       proc {
         raw_register.git_url = new_git_url
+        raw_register.save
       }
     end
 
@@ -76,6 +77,14 @@ RSpec.describe Paneron::Register::Raw::Register do
       it "changes git URL" do
         expect(&action).to change {
           raw_register.git_url
+        }.from(old_git_url).to(new_git_url)
+      end
+
+      it "changes git remote", :ok do
+        expect(raw_register.git_client_remote_url).to eq old_git_url
+
+        expect(&action).to change {
+          raw_register.git_client_remote_url
         }.from(old_git_url).to(new_git_url)
       end
     end

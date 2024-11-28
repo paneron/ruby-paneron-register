@@ -128,16 +128,6 @@ module Paneron
             @git_save_fn = nil
 
             git_fn = proc {
-              # Check if remote matches the provided git_url
-              if !@git_client.remote(@git_remote_name).url.nil? && @git_client.remote(@git_remote_name).url != git_url
-
-                raise Paneron::Register::Error,
-                      "Git remote @ #{clone_path} already exists " \
-                      "(#{@git_client.remote(@git_remote_name).url}) " \
-                      "but does not match provided URL (#{git_url}).\n" \
-                      "Instead, use `r = #{self}.new(\"#{path}\")` and "\
-                      "`r.git_url = \"#{git_url}\"` to change its Git URL."
-              end
               log_change_git_remote(git_url)
               change_git_remote(git_url)
 
@@ -497,6 +487,14 @@ module Paneron
           }
         end
 
+        def git_client_remote_url
+          if @git_client.nil?
+            nil
+          else
+            @git_client.remote(@git_remote_name).url
+          end
+        end
+
         private
 
         def log_change_git_remote(new_url)
@@ -507,9 +505,10 @@ module Paneron
         def change_git_remote(new_url, git_client: @git_client)
           if !git_client.remote(@git_remote_name).url.nil?
             git_client.remove_remote(@git_remote_name)
-            if !new_url.nil?
-              git_client.add_remote(@git_remote_name)
-            end
+          end
+
+          if !new_url.nil?
+            git_client.add_remote(@git_remote_name, new_url)
           end
         end
 
