@@ -18,7 +18,7 @@ RSpec.describe Paneron::Register::DataSet do
 
     it "returns an array of Paneron::Register::ItemClass objects" do
       data_set.item_classes.each do |item_class|
-        expect(item_class).to be_instance_of(Paneron::Register::ItemClass)
+        expect(item_class).to be_kind_of(Paneron::Register::ItemClass)
       end
     end
   end
@@ -26,6 +26,64 @@ RSpec.describe Paneron::Register::DataSet do
   describe "#name" do
     it "retrieves the data set name" do
       expect(data_set.name).to eql("reg-1")
+    end
+  end
+
+  describe "#metadata" do
+    it "retrieves the data set metadata as a LutaML instance" do
+      expect(data_set.metadata).to be_kind_of(Lutaml::Model::Serializable)
+    end
+
+    it "retrieves the data set metadata" do
+      expect(data_set.metadata.to_yaml).to eql(<<~YAML)
+        ---
+        name: Test Data Set 1
+        stakeholders:
+        - roles:
+          - submitter
+          - manager
+          - control-body-reviewer
+          - control-body
+          - owner
+          name: Stake Holder 1
+          gitServerUsername: stakeholder1
+          contacts:
+          - label: email
+            value: stakeholder1@example.com
+        - roles:
+          - owner
+          - manager
+          name: Stake Holder 2
+          gitServerUsername: stakeholder2
+          affiliations:
+            00000000-000a-000b-000c-000000000000:
+              role: member
+          contacts:
+          - label: email
+            value: stakeholder2@example.com
+        version:
+          id: '1.1'
+          timestamp: 2024-01-01 07:00:00.000000000 Z
+        contentSummary: "<p> This is a test data set. </p>"
+        operatingLanguage:
+          name: English
+          country: N/A
+          languageCode: eng
+        organizations:
+          00000000-000a-000b-000c-000000000000:
+            name: Stake Holdings, Inc.
+            logoURL: ''
+      YAML
+    end
+  end
+
+  describe "#paneron_metadata" do
+    it "retrieves the Paneron data set metadata as a LutaML instance" do
+      expect(data_set.paneron_metadata).to be_kind_of(Lutaml::Model::Serializable)
+    end
+
+    it "retrieves the Paneron data set metadata" do
+      expect(YAML.load(data_set.paneron_metadata.to_yaml)).to eql({ "title" => "reg-1" })
     end
   end
 end

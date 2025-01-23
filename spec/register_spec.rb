@@ -27,15 +27,20 @@ RSpec.describe Paneron::Register::Register do
   end
 
   describe "#metadata" do
-    subject(:metadata) { JSON.parse(register.metadata) }
+    subject(:metadata) { register.metadata }
 
-    it { is_expected.to be_instance_of(Hash) }
-    let(:expected_hash) do
-      {
-        "datasets" => { "reg-1" => true, "reg-2" => true, "reg-3" => true },
-        "title" => "register",
-      }
+    it { is_expected.to be_kind_of(Lutaml::Model::Serializable) }
+
+    describe "#metadata.to_yaml" do
+      subject(:parsed_yaml) { YAML.load(register.metadata.to_yaml) }
+
+      let(:expected_hash) do
+        {
+          "datasets" => { "reg-1" => true, "reg-2" => true, "reg-3" => true },
+          "title" => "register",
+        }
+      end
+      it { is_expected.to eql(expected_hash) }
     end
-    it { is_expected.to eql(expected_hash) }
   end
 end

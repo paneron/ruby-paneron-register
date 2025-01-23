@@ -186,6 +186,8 @@ module Paneron
           Paneron::Register::DataSet.new(
             name: data_set_name,
             item_classes: item_class_lutamls,
+            metadata: metadata_lutaml,
+            paneron_metadata: paneron_metadata_lutaml,
           )
         end
 
@@ -295,6 +297,12 @@ module Paneron
           @paneron_metadata = new_paneron_metadata
         end
 
+        def paneron_metadata_lutaml
+          Paneron::Register::PaneronMetadata.new(
+            paneron_metadata,
+          )
+        end
+
         def metadata
           @metadata ||= begin
             YAML.safe_load_file(
@@ -304,6 +312,12 @@ module Paneron
           rescue Errno::ENOENT
             {}
           end
+        end
+
+        def metadata_lutaml
+          Paneron::Register::DataSetMetadata.new(
+            metadata,
+          )
         end
 
         def merge_metadata(other)
