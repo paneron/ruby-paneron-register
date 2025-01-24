@@ -9,11 +9,6 @@ module Paneron
         attribute :uuid, Lutaml::Model::Type::String
         attribute :name, Lutaml::Model::Type::String
         attribute :logoURL, Lutaml::Model::Type::String, default: -> { "" }
-
-        yaml do
-          map :name, to: :name
-          map :logoURL, to: :logoURL
-        end
       end
     end
   end

@@ -39,21 +39,21 @@ RSpec.describe Paneron::Register::DataSet do
         ---
         name: Test Data Set 1
         stakeholders:
-        - roles:
+        - name: Stake Holder 1
+          roles:
           - submitter
           - manager
           - control-body-reviewer
           - control-body
           - owner
-          name: Stake Holder 1
           gitServerUsername: stakeholder1
           contacts:
           - label: email
             value: stakeholder1@example.com
-        - roles:
+        - name: Stake Holder 2
+          roles:
           - owner
           - manager
-          name: Stake Holder 2
           gitServerUsername: stakeholder2
           affiliations:
             00000000-000a-000b-000c-000000000000:

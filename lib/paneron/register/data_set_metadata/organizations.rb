@@ -6,7 +6,8 @@ module Paneron
   module Register
     class DataSetMetadata < Lutaml::Model::Serializable
       class Organizations < Lutaml::Model::Serializable
-        attribute :organizations, Paneron::Register::DataSetMetadata::Organizations
+        attribute :organizations, Paneron::Register::DataSetMetadata::Organization,
+                  collection: true
 
         key_value do
           map to: :organizations,
