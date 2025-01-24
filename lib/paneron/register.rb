@@ -8,6 +8,8 @@ require "paneron/register/validatable"
 require "paneron/register/hierarchical"
 require "paneron/register/root_finder"
 
+require "paneron/register/type/js_date_iso_string"
+
 require "paneron/register/raw/item"
 require "paneron/register/raw/item_class"
 require "paneron/register/raw/data_set"

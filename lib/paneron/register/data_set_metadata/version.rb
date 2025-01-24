@@ -7,7 +7,7 @@ module Paneron
     class DataSetMetadata < Lutaml::Model::Serializable
       class Version < Lutaml::Model::Serializable
         attribute :id, Lutaml::Model::Type::String
-        attribute :timestamp, Lutaml::Model::Type::DateTime
+        attribute :timestamp, Paneron::Register::Type::JSDateISOString
       end
     end
   end

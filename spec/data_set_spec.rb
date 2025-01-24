@@ -63,7 +63,7 @@ RSpec.describe Paneron::Register::DataSet do
             value: stakeholder2@example.com
         version:
           id: '1.1'
-          timestamp: 2024-01-01 07:00:00.000000000 Z
+          timestamp: '2024-01-01T07:00:00.000Z'
         contentSummary: "<p> This is a test data set. </p>"
         operatingLanguage:
           name: English
