@@ -8,7 +8,7 @@ module Paneron
       class OperatingLanguage < Lutaml::Model::Serializable
         attribute :name, Lutaml::Model::Type::String, default: -> { "English" }
         attribute :country, Lutaml::Model::Type::String, default: -> { "N/A" }
-        attribute :language, Lutaml::Model::Type::String, default: -> { "eng" }
+        attribute :languageCode, Lutaml::Model::Type::String, default: -> { "eng" }
       end
     end
   end
