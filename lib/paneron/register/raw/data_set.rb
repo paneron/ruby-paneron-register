@@ -315,8 +315,8 @@ module Paneron
         end
 
         def metadata_lutaml
-          Paneron::Register::DataSetMetadata.new(
-            metadata,
+          Paneron::Register::DataSetMetadata.from_yaml(
+            metadata.to_yaml,
           )
         end
 

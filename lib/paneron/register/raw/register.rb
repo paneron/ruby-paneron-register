@@ -366,7 +366,7 @@ module Paneron
         def to_lutaml
           Paneron::Register::Register.new(
             data_sets: data_set_lutamls,
-            metadata: Paneron::Register::RegisterMetadata.from_json(metadata.to_json),
+            metadata: Paneron::Register::RegisterMetadata.from_yaml(metadata.to_yaml),
           )
         end
 
