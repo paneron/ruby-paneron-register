@@ -8,7 +8,7 @@ module Paneron
       class Organization < Lutaml::Model::Serializable
         attribute :uuid, Lutaml::Model::Type::String
         attribute :name, Lutaml::Model::Type::String
-        attribute :logoURL, Lutaml::Model::Type::String, default: -> { "" }
+        attribute :logoURL, Lutaml::Model::Type::String
       end
     end
   end
