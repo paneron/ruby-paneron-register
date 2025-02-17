@@ -2,6 +2,7 @@
 
 require "lutaml/model"
 
+# NOTE: All attributes in a LutaML model are optional by default.
 module Paneron
   module Register
     class DataSetMetadata < Lutaml::Model::Serializable
@@ -18,7 +19,6 @@ module Paneron
                   ]
         attribute :gitServerUsername, Lutaml::Model::Type::String
         attribute :affiliations, Paneron::Register::DataSetMetadata::Affiliations
-        # NOTE: There is no { optional: true } # Use render_nil: true for all other attributes in the render block instead
         attribute :notes, Lutaml::Model::Type::String
         attribute :contacts, Paneron::Register::DataSetMetadata::Contact,
                   collection: true
