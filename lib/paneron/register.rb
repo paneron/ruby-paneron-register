@@ -36,7 +36,6 @@ require "paneron/register/data_set_metadata"
 
 require "paneron/register/data_set"
 require "paneron/register/register_metadata/dataset"
-require "paneron/register/register_metadata/datasets"
 require "paneron/register/register_metadata"
 require "paneron/register/register"
 
