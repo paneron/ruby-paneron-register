@@ -366,8 +366,36 @@ module Paneron
         def to_lutaml
           Paneron::Register::Register.new(
             data_sets: data_set_lutamls,
-            metadata: metadata.to_json,
+            metadata: Paneron::Register::RegisterMetadata.new({
+              "title" => metadata["title"],
+              # "datasets" => metadata["datasets"],
+              # "datasets" => metadata["datasets"].reduce({}) do |acc, (data_set_name, value)|
+              #   acc[data_set_name] = Paneron::Register::RegisterMetadata::Dataset.new(
+              #     data_set_name: data_set_name,
+              #     data_set_available: value,
+              #   )
+              #   acc
+              # end,
+              "datasets" => metadata["datasets"].map do |data_set_name, value|
+                Paneron::Register::RegisterMetadata::Dataset.new(
+                  data_set_name: data_set_name,
+                  data_set_available: value,
+                )
+              end,
+            }),
           )
+
+          # # Error: Psych::DisallowedClass: Tried to load unspecified class: Paneron::Register::DataSet
+
+          # Paneron::Register::Register.from_yaml(
+          #   Lutaml::Model::Config.yaml_adapter.new(
+          #     data_sets: data_set_lutamls,
+          #     metadata: {
+          #       "title" => metadata["title"],
+          #       "datasets" => metadata["datasets"],
+          #     },
+          #   ).to_yaml,
+          # )
         end
 
         def data_set_names(refresh: false)
